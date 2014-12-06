@@ -2,4 +2,7 @@
 
 * DONE Download FF for developers, and load page.
 
-* Display the GIF grammar in a div. Instead load the header when you click on its representation. Make a CSS class for clickable elements, including hover styling.
+* DONE Display the GIF grammar in a div. Instead load the header when you click on its representation. Make a CSS class for clickable elements, including hover styling.
+[2014-12-06 Sat 11:39]
+
+* Display the byte range in the debug window.

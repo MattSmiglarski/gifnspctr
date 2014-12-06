@@ -1,23 +1,3 @@
-var structure = {
-    
-};
-
-function BinaryData() {
-    return {
-        available: function() {}        
-    };
-}
-
-function ServerResource(url) {
-    var cursor = 0;
-
-    return {
-        read: function(n) {
-
-        }
-    };
-}
-
 function rangeRequest(url, from, until, callback) {
     var arrayBuffer;
     var req = new XMLHttpRequest();
@@ -31,14 +11,22 @@ function rangeRequest(url, from, until, callback) {
     req.send(null);
 }
 
-
-window.onload = function(evt) {
-    console.log("Document loaded");
+function displayHeader() {
     rangeRequest(
         "http://localhost/Y9ax5kJ.gif",
         0, 5,
         function(arrayBuffer) {
             console.log(arrayBuffer);
             document.getElementById("gifheader").innerHTML = arrayBuffer.slice(0, 5);
+        });
+}
+
+window.onload = function(evt) {
+    console.log("Document loaded");
+    Array.every(
+        document.querySelectorAll('.header'),
+        function(el) {
+            el.onclick = displayHeader;
+            el.classList.add("clickable");
         });
 }

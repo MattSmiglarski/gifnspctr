@@ -1,4 +1,62 @@
+body {
+    margin: 0;
+}
+
+.grammar, .output {
+    display: inline-block;
+    border: solid black 1px;
+    border-radius: 1.5em;
+    margin: 0 0 0.5em 1em;
+    min-width: 20em;
+    padding: 1em;
+}
+
 #gifheader {
     height: 3em;
-    border: solid black 1px;
+}
+
+.grammar {}
+
+.rule {}
+
+.word, .token {
+    color: #f0f0f0;
+    padding: 0.1em 0.4em 0.1em 0.4em;
+    border-radius: 0.2em;
+    margin: 1em;
+}
+
+.word {
+    background-color: blue;
+}
+
+.token {
+    background-color: green;
+}
+
+.nary::after {
+    content: "*";
+}
+
+.optional::before { content: "["; }
+.optional::after { content: "]"; }
+
+.rule :first-child {
+    display: inline-block;
+    width: 15em;
+    color: black;
+    background-color: white;
+}
+
+.clickable {
+    text-decoration: underline;
+    cursor: pointer;
+    user-select: none;
+    -moz-user-select: none;
+}
+
+.clickable:hover {
+    background: #303030;
+    color: #f0f0f0;
+    transition: background 0.9s, color 0.4s;
 }

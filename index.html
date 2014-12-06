@@ -5,9 +5,69 @@
   <script src="app.js"></script>
 </head>
 <body>
-  <h1>Binary format navigator</h1>
+  <h1>GIF format navigator</h1>
 
-  <div id="gifheader"></div>
+  <div class="output" id="gifheader">
+    &nbsp;
+  </div>
+
+  <div style="clear: both; height: 0;"/>
+
+  <div class="grammar">
+
+  <h3>The Grammar</h3>
+    <div class="rule">
+      <span class="word">GIF Data Stream</span> ::=
+      
+      <span class="token header">Header</span>
+      <span class="word">Logical Screen</span>
+      <span class="word nary">Data</span>
+      <span class="token">Trailer</span>
+    </div>
+
+    <div class="rule">
+      <span class="word">Logical Screen</span> ::=
+
+      <span class="token">Logical Screen Descriptor</span>
+      <span class="token optional">Global Color Table</span>
+    </div>
+
+    <div class="rule">
+      <span class="word">Data</span> ::=
+
+      <span class="word">Graphic Block</span>
+      <span class="word">Special-Purpose Block</span>
+    </div>
+
+    <div class="rule">
+      <span class="word">Graphic Block</span> ::=
+
+      <span class="word optional">Graphic Control Extension</span>
+      <span class="word">Graphic-Rendering Block</span>
+    </div>
+
+    <div class="rule">
+      <span class="word">Graphic-Rendering Block</span> ::=
+
+      <span class="word">Table-Based Image</span> |
+      <span class="word">Plain Text Extension</span>
+    </div>
+
+    <div class="rule">
+      <span class="word">Table-Based Image</span> ::=
+
+      <span class="token">Image Descriptor</span> |
+      <span class="token optional">Local Color Table</span>
+      <span class="token">Image Data</span>
+    </div>
+
+    <div class="rule">
+      <span class="word">Special-Purpose Block</span> ::=
+
+      <span class="token">Application Extension</span> |
+      <span class="token">Comment Extension</span>
+    </div>
+  </div>  
 </body>
 </html>
 
