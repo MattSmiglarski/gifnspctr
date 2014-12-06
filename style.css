@@ -2,12 +2,37 @@ body {
     margin: 0;
 }
 
+#gifurl {
+    display: none;
+    float:left;
+    margin: 0 1em 0 0;
+}
+
+#links {
+    display: inline;
+    float: left;
+}
+
+#links a {
+    text-decoration: none;
+    font-style: italic;
+    color: #a0a0a0;
+    font-size: 11pt;
+    margin: 0.4em;
+}
+
+#bookmarklet {
+    display: inline-block;
+    float: right;
+}
+
 .grammar, .output {
     display: inline-block;
     border: solid black 1px;
     border-radius: 1.5em;
     margin: 0 0 0.5em 1em;
     padding: 1em;
+    float: left;
 }
 
 .grammar {}

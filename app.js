@@ -1,5 +1,10 @@
-var gifurl = "http://localhost/Y9ax5kJ.gif";
-gifurl = "http://localhost/GifSample.gif";
+function determineGifUrl() {
+    var gifurl = document.location.search.replace(
+        /.*gif=([^\&]+).*/,
+        function(match, $1) { return $1; }
+    );
+    return gifurl || "http://localhost/GifSample.gif";
+}
 
 var textDecoder = new TextDecoder("utf-8");
 
@@ -59,9 +64,9 @@ function navigateGif(data, visitor) {
             visitor.terminator();
             break;
         case '!': // extension
-            nextByte = data.slice(cursor, cursor += 1)[0];
+            nextByte = data.slice(cursor, cursor += 1);
 
-            throw "Not implemented!";
+            throw "extensions not implemented! " + nextByte;
 
             switch (nextByte) {
             case 0x1: // read_plain_text_extension
@@ -77,6 +82,7 @@ function navigateGif(data, visitor) {
             }
             break;
         case ',': // imagedescriptor
+            throw "imagedescriptor not implemented!";
             break;
         default:
             throw ("Unexpected at " + cursor + " : " + nextByte);
@@ -137,8 +143,9 @@ var widgetCreator = {
     }
 };
 
-function init() {
+function init(gifurl) {
     var arrayBuffer;
+    document.getElementById("gifurl").innerHTML = gifurl;
     var req = new XMLHttpRequest();
     req.open("GET", gifurl, true);
     req.responseType = "arraybuffer";
@@ -149,5 +156,5 @@ function init() {
 }
 
 window.onload = function(evt) {
-    init();
+    init(determineGifUrl());
 }
