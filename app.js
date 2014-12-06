@@ -1,3 +1,6 @@
+var gifurl = "http://localhost/Y9ax5kJ.gif";
+gifurl = "http://localhost/GifSample.gif";
+
 function rangeRequest(url, from, until, callback) {
     var arrayBuffer;
     var req = new XMLHttpRequest();
@@ -13,13 +16,13 @@ function rangeRequest(url, from, until, callback) {
 
 function widgetRange(widget, start, length, formatter) {
     rangeRequest(
-        "http://localhost/Y9ax5kJ.gif",
+        gifurl,
         start,
         start + length,
         function(arrayBuffer) {
             widget.setContent(formatter(arrayBuffer));
             widget.setRange(start, start + length);
-        });    
+        });
 }
 
 function binInt(h) {
@@ -50,11 +53,11 @@ function stringFormatter(n) {
 function lsdFormatter(x) {
     var dv = new DataView(x);
     return {
-        'LogialScreenWidth': dv.getInt16(0),
-        'LogicalScreenHeight': dv.getInt16(1),
-        'PackedFields': dv.getInt8(4),
-        'BackgroundColorIndex': dv.getInt8(5),
-        'PixelAspectRatio': dv.getInt8(6)
+        'LogialScreenWidth': dv.getUint16(0, true),
+        'LogicalScreenHeight': dv.getUint16(2, true),
+        'PackedFields': dv.getUint8(4, true),
+        'BackgroundColorIndex': dv.getUint8(5, true),
+        'PixelAspectRatio': dv.getUint8(6, true)
     };
  }
 
@@ -71,7 +74,75 @@ function init() {
     Array.every(
         document.querySelectorAll('.logicalscreendescriptor'),
         function(el) {
-            el.onclick = function() { widgetRange(debug, 5, 7, lsdFormatter); },
+            el.onclick = function() {
+                var start = 6, length = 7, widget = debug;
+                rangeRequest(
+                    gifurl,
+                    start,
+                    start + length,
+                    function(arrayBuffer) {
+                        var json = lsdFormatter(arrayBuffer);
+                        widget.setContent(json);
+                        widget.setRange(start, start + length);
+                        
+                        var hasGlobalColorTable = json['PackedFields'] >> 7;
+                        var sizeOfGct = json['PackedFields'] & 7;
+
+                        var cursor = 13;
+                        
+                        gctEl = document.querySelector('.globalcolortable')
+                        if (hasGlobalColorTable) {
+                            gctEl.onclick = function(evt) {
+                                rangeRequest(
+                                    gifurl,
+                                    cursor,
+                                    cursor + 3 * (2 << sizeOfGct),
+                                    function(arraybuffer) {
+                                        var dv = new DataView(arraybuffer);
+                                        var i=0, r, g, b;
+
+                                        var gct = [];
+                                        for (i=0; i < 2<<sizeOfGct; i+=1) {
+                                            gct.push({
+                                                r: dv.getUint8(3*i),
+                                                g: dv.getUint8(3*i+1),
+                                                b: dv.getUint8(3*i+2)
+                                            });
+                                        }
+
+                                        var container = document.createElement("div");
+                                        container.classList.add("output");
+                                        
+                                        var canvas = document.createElement("canvas");
+                                        var context = canvas.getContext("2d");
+                                        
+                                        container.appendChild(canvas);
+                                        document.body.appendChild(container);
+
+                                        var width = 8, height;
+                                        height = (2 << sizeOfGct) / width;
+
+                                        var zoom = 10;
+                                        var color;
+                                        for (i=0; i<height; i++) {
+                                            for (j=0; j<width; j++) {
+                                                color = gct[i*width + j];
+                                                context.fillStyle = "#"
+                                                    + color['r'].toString(16)
+                                                    + color['g'].toString(16)
+                                                    + color['b'].toString(16);
+                                                context.fillRect(j*zoom, i*zoom, (j+1)*zoom, (i+1) * zoom);
+                                                console.log((j+1)*zoom, (i+1) * zoom);
+                                            }
+                                        }
+                                });
+                            };
+                            gctEl.classList.add('clickable');
+                        } else {
+                            gctEl.classList.add('nada');
+                        }
+                    });
+            }
             el.classList.add('clickable');
         });
 }
