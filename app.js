@@ -1,150 +1,151 @@
 var gifurl = "http://localhost/Y9ax5kJ.gif";
 gifurl = "http://localhost/GifSample.gif";
 
-function rangeRequest(url, from, until, callback) {
-    var arrayBuffer;
-    var req = new XMLHttpRequest();
-    var byterange = "bytes=" + from + "-" + until;
-    req.open("GET", url, true);
-    req.setRequestHeader("Range", byterange);
-    req.responseType = "arraybuffer";
-    req.onload = function(evt) {
-        callback(req.response);
-    };
-    req.send(null);
-}
-
-function widgetRange(widget, start, length, formatter) {
-    rangeRequest(
-        gifurl,
-        start,
-        start + length,
-        function(arrayBuffer) {
-            widget.setContent(formatter(arrayBuffer));
-            widget.setRange(start, start + length);
-        });
-}
-
-function binInt(h) {
-    return h;
-}
-
-function binByte(b) {
-    return b;
-}
-
-DataView.prototype.getUTF8String = function(offset, length) {
-    var utf16 = new ArrayBuffer(length * 2);
-    var utf16View = new Uint16Array(utf16);
-    for (var i = 0; i < length; ++i) {
-        utf16View[i] = this.getUint8(offset + i);
-    }
-    return String.fromCharCode.apply(null, utf16View);
-};
-
 var textDecoder = new TextDecoder("utf-8");
 
-function stringFormatter(n) {
-    return function(x) {
-        return textDecoder.decode(x.slice(0, n));
-    }
+function stringFormatter(x) {
+    return textDecoder.decode(x);
 }
 
 function lsdFormatter(x) {
     var dv = new DataView(x);
+    _lsddv = dv;
     return {
-        'LogialScreenWidth': dv.getUint16(0, true),
-        'LogicalScreenHeight': dv.getUint16(2, true),
-        'PackedFields': dv.getUint8(4, true),
-        'BackgroundColorIndex': dv.getUint8(5, true),
-        'PixelAspectRatio': dv.getUint8(6, true)
+        LogialScreenWidth: dv.getUint16(0, true),
+        LogicalScreenHeight: dv.getUint16(2, true),
+        PackedFields: dv.getUint8(4, true),
+        BackgroundColorIndex: dv.getUint8(5, true),
+        PixelAspectRatio: dv.getUint8(6, true)
     };
- }
+}
+
+function colorTableParser(size, arraybuffer) {
+    var dv = new DataView(arraybuffer);
+    var i=0, r, g, b;
+    
+    var gct = [];
+    for (i=0; i < 2<<size; i+=1) {
+        gct.push({
+            r: dv.getUint8(3*i),
+            g: dv.getUint8(3*i+1),
+            b: dv.getUint8(3*i+2)
+        });
+    }
+    return gct;
+}
+
+function navigateGif(data, visitor) {
+    var header, lsd, gct, gctdata, nextChar, sizeOfGct, cursor = 0;
+
+    header = stringFormatter(data.slice(cursor, cursor += 6));
+    visitor.header(header);
+
+    lsd = lsdFormatter(data.slice(cursor, cursor += 7));
+    visitor.lsd(lsd);
+
+    if (lsd.PackedFields >> 7) { // hasGlobalColorTable
+        sizeOfGct = lsd.PackedFields & 7;
+
+        gctdata = data.slice(cursor, cursor += (3 * (2 << sizeOfGct)));
+        gct = colorTableParser(sizeOfGct, gctdata);
+        visitor.gct(gct);
+    }
+
+    while (true) {
+        nextByte = stringFormatter(data.slice(cursor, cursor += 1));
+
+        switch(nextByte) {
+        case ';': // terminator
+            visitor.terminator();
+            break;
+        case '!': // extension
+            nextByte = data.slice(cursor, cursor += 1)[0];
+
+            throw "Not implemented!";
+
+            switch (nextByte) {
+            case 0x1: // read_plain_text_extension
+                break;
+            case 0xf9: // read_graphic_control_extension
+                break;
+            case 0xfe: // read_comment_extension
+                break;
+            case 0xff: // read_application_extension
+                break;
+            default:  
+                throw "Unexpected byte " + nextByte;
+            }
+            break;
+        case ',': // imagedescriptor
+            break;
+        default:
+            throw ("Unexpected at " + cursor + " : " + nextByte);
+        }
+    }
+}
+
+function addContainer(content) {
+    var container = document.createElement("div");
+    container.classList.add("output");
+    var debug = new DebugOutput(container);
+    debug.setContent(content);
+    document.body.appendChild(container);
+}
+
+var widgetCreator = {
+    header: function(header) {
+        addContainer(header);
+    },
+    lsd: function(lsd) {
+        addContainer(lsd);
+    },
+    gct: function(gct) {
+        _gct = gct;
+        var container = document.createElement("div");
+        container.classList.add("output");
+        
+        var i=0, width = 1, height;
+
+        while (gct.length >> i > 0) {
+            i+=1;
+        }
+        width = (i - 1) * 2;
+        height = gct.length / width;
+        
+        var zoom = 10;
+        var canvas = document.createElement("canvas");
+        canvas.width = zoom * width;
+        canvas.height = zoom * height;
+        canvas.style.width = canvas.width + "px";
+        canvas.style.height = canvas.height + "px";
+        var context = canvas.getContext("2d");
+        container.appendChild(canvas);
+        document.body.appendChild(container);
+        
+
+        var color;
+        for (i=0; i<height; i++) {
+            for (j=0; j<width; j++) {
+                color = gct[i*width + j];
+                context.fillStyle = "#"
+                    + color['r'].toString(16)
+                    + color['g'].toString(16)
+                    + color['b'].toString(16);
+                context.fillRect(j*zoom, i*zoom, zoom, zoom);
+            }
+        }
+    }
+};
 
 function init() {
-    var debug = new DebugOutput(document.getElementById("gifheader"));
-    
-    Array.every(
-        document.querySelectorAll('.header'),
-        function(el) {
-            el.onclick = function() { widgetRange(debug, 0, 5, stringFormatter(5)); };
-            el.classList.add("clickable");
-        });
-
-    Array.every(
-        document.querySelectorAll('.logicalscreendescriptor'),
-        function(el) {
-            el.onclick = function() {
-                var start = 6, length = 7, widget = debug;
-                rangeRequest(
-                    gifurl,
-                    start,
-                    start + length,
-                    function(arrayBuffer) {
-                        var json = lsdFormatter(arrayBuffer);
-                        widget.setContent(json);
-                        widget.setRange(start, start + length);
-                        
-                        var hasGlobalColorTable = json['PackedFields'] >> 7;
-                        var sizeOfGct = json['PackedFields'] & 7;
-
-                        var cursor = 13;
-                        
-                        gctEl = document.querySelector('.globalcolortable')
-                        if (hasGlobalColorTable) {
-                            gctEl.onclick = function(evt) {
-                                rangeRequest(
-                                    gifurl,
-                                    cursor,
-                                    cursor + 3 * (2 << sizeOfGct),
-                                    function(arraybuffer) {
-                                        var dv = new DataView(arraybuffer);
-                                        var i=0, r, g, b;
-
-                                        var gct = [];
-                                        for (i=0; i < 2<<sizeOfGct; i+=1) {
-                                            gct.push({
-                                                r: dv.getUint8(3*i),
-                                                g: dv.getUint8(3*i+1),
-                                                b: dv.getUint8(3*i+2)
-                                            });
-                                        }
-
-                                        var container = document.createElement("div");
-                                        container.classList.add("output");
-                                        
-                                        var canvas = document.createElement("canvas");
-                                        var context = canvas.getContext("2d");
-                                        
-                                        container.appendChild(canvas);
-                                        document.body.appendChild(container);
-
-                                        var width = 8, height;
-                                        height = (2 << sizeOfGct) / width;
-
-                                        var zoom = 10;
-                                        var color;
-                                        for (i=0; i<height; i++) {
-                                            for (j=0; j<width; j++) {
-                                                color = gct[i*width + j];
-                                                context.fillStyle = "#"
-                                                    + color['r'].toString(16)
-                                                    + color['g'].toString(16)
-                                                    + color['b'].toString(16);
-                                                context.fillRect(j*zoom, i*zoom, (j+1)*zoom, (i+1) * zoom);
-                                                console.log((j+1)*zoom, (i+1) * zoom);
-                                            }
-                                        }
-                                });
-                            };
-                            gctEl.classList.add('clickable');
-                        } else {
-                            gctEl.classList.add('nada');
-                        }
-                    });
-            }
-            el.classList.add('clickable');
-        });
+    var arrayBuffer;
+    var req = new XMLHttpRequest();
+    req.open("GET", gifurl, true);
+    req.responseType = "arraybuffer";
+    req.onload = function(evt) {
+        navigateGif(req.response, widgetCreator);
+    };
+    req.send(null);
 }
 
 window.onload = function(evt) {

@@ -7,12 +7,7 @@ body {
     border: solid black 1px;
     border-radius: 1.5em;
     margin: 0 0 0.5em 1em;
-    min-width: 10em;
     padding: 1em;
-}
-
-#gifheader {
-    min-height: 3em;
 }
 
 .grammar {}
