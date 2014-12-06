@@ -11,22 +11,30 @@ function rangeRequest(url, from, until, callback) {
     req.send(null);
 }
 
-function displayHeader() {
+function displayHeader(widget) {
+    var from = 0, to=5;
     rangeRequest(
         "http://localhost/Y9ax5kJ.gif",
-        0, 5,
+        from,
+        to,
         function(arrayBuffer) {
-            console.log(arrayBuffer);
-            document.getElementById("gifheader").innerHTML = arrayBuffer.slice(0, 5);
+            widget.setContent(arrayBuffer);
+            widget.setRange(from, to);
         });
 }
 
-window.onload = function(evt) {
-    console.log("Document loaded");
+function init() {
+    var debug = new DebugOutput(document.getElementById("gifheader"));
+    
     Array.every(
         document.querySelectorAll('.header'),
         function(el) {
-            el.onclick = displayHeader;
+            el.onclick = function() { displayHeader(debug); };
             el.classList.add("clickable");
         });
+
+}
+
+window.onload = function(evt) {
+    init();
 }
