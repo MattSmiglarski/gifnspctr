@@ -1,0 +1,5 @@
+* DONE Read the header of a gif into a json structure and pass it to a widget on the page.
+
+* DONE Download FF for developers, and load page.
+
+* Display the GIF grammar in a div. Instead load the header when you click on its representation. Make a CSS class for clickable elements, including hover styling.
