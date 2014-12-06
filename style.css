@@ -12,7 +12,7 @@ body {
 }
 
 #gifheader {
-    height: 3em;
+    min-height: 3em;
 }
 
 .grammar {}

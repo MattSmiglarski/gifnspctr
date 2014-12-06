@@ -7,4 +7,6 @@
 
 * DONE Display the byte range in the debug window.
 
-* Debug the logical screen descriptor on click.
+* DONE Debug the logical screen descriptor on click.
+
+* TODO Reorder the widgets. Parse the optional 'global color table' onclick. Remember whether it exists or not, and make data debuggable on click.
