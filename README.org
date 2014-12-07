@@ -14,4 +14,5 @@
 * DONE Reduce, refactor and cleanup. Separate format navigation. Dynamic container widgets. Highlight container on structure click, if it has already been created.
 
 * DONE Select GIF from the query string. Provide a bookmarklet at the top of the page.
-* TODO Implement extension parsing.
+* DONE Complete parsing.
+* TODO Add basic widgets for all visitor items.
