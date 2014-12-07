@@ -24,12 +24,14 @@ function colorTableWidget(gct) {
     container.classList.add("output");
     container.classList.add("realsquare");
     
-    var i=0, width = 1, height;
+    var i,j, width = 1, height;
 
-    while (gct.length >> i > 0) {
-        i+=1;
+    var sqrt = Math.sqrt(gct.length);
+    if (Math.round(sqrt) == sqrt) {
+        width = sqrt;
+    } else {
+        width = Math.sqrt(gct.length << 1);
     }
-    width = (i - 1) * 2;
     height = gct.length / width;
     
     var zoom = 10;

@@ -10,4 +10,4 @@
 * DONE Add basic widgets for all visitor items.
 * DONE Style cleanup
 * DONE Add more external links, trailer widget and titles on widgets.
-
+* DONE Fix colour table widget size bug.
