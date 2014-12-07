@@ -3,6 +3,10 @@ body {
     background: #F2FFEA;
 }
 
+.empty {
+    background-color: black !important;
+}
+
 #navbar {
     border-bottom: solid #DBDBDB 2px;
     padding: 0.3em;

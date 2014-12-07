@@ -1,6 +1,9 @@
 function addContainer(content) {
     var container = document.createElement("div");
     container.classList.add("output");
+    if (content.length == "") {
+        container.classList.add("empty");
+    }
 
     if (typeof(content) == 'string') {
         container.innerHTML = content;
@@ -11,6 +14,7 @@ function addContainer(content) {
     }
 
     document.body.appendChild(container);
+    return container;
 }
 
 function colorTableWidget(gct) {
