@@ -1,5 +1,13 @@
 body {
     margin: 0;
+    background: #F2FFEA;
+}
+
+#navbar {
+    border-bottom: solid #DBDBDB 2px;
+    padding: 0.3em;
+    line-height: 1.5em;
+    background: #F8F5EB;
 }
 
 #gifurl {
@@ -29,29 +37,52 @@ body {
 .grammar, .output {
     display: inline-block;
     border: solid black 1px;
-    border-radius: 1.5em;
+    border-radius: 0.5em;
     margin: 0 0 0.5em 1em;
-    padding: 1em;
+    padding: 0.4em;
     float: left;
 }
 
-.grammar {}
+.output {
+    height: 156px;
+    overflow:hidden;
+    position: relative;
+    float: left;
+    background: #E8FFD9;
+}
+
+.output pre {
+    background: inherit;
+}
+
+.smoothcorners {
+    border-radius: 0.4em;
+}
+
+.output:hover {
+    overflow: visible;
+    z-index: 999;
+}
+
+.grammar {
+    background: #D9E7E4;
+}
 
 .rule {}
 
 .word, .token {
-    color: #f0f0f0;
+    color: #0f0f0f;
     padding: 0.1em 0.4em;
     border-radius: 0.2em;
     margin: 0.2em 0;
 }
 
 .word {
-    background-color: blue;
+    background-color: #DBE091;
 }
 
 .token {
-    background-color: green;
+    background-color: #B7D7FC;
 }
 
 .nary::after {
@@ -65,7 +96,7 @@ body {
     display: inline-block;
     width: 15em;
     color: black;
-    background-color: white;
+    background-color: #C9EAB2;
 }
 
 .clickable {

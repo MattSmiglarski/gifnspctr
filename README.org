@@ -1,18 +1,11 @@
 * DONE Read the header of a gif into a json structure and pass it to a widget on the page.
-
 * DONE Download FF for developers, and load page.
-
 * DONE Display the GIF grammar in a div. Instead load the header when you click on its representation. Make a CSS class for clickable elements, including hover styling.
-[2014-12-06 Sat 11:39]
-
 * DONE Display the byte range in the debug window.
-
 * DONE Debug the logical screen descriptor on click.
-
 * DONE Reorder the widgets. Parse the optional 'global color table' onclick. Remember whether it exists or not, and make data debuggable on click.
-
 * DONE Reduce, refactor and cleanup. Separate format navigation. Dynamic container widgets. Highlight container on structure click, if it has already been created.
-
 * DONE Select GIF from the query string. Provide a bookmarklet at the top of the page.
 * DONE Complete parsing.
-* TODO Add basic widgets for all visitor items.
+* DONE Add basic widgets for all visitor items.
+* DONE Style cleanup

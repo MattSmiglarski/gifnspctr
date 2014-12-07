@@ -1,28 +1,53 @@
-function DebugOutput(element) {
+function addContainer(content) {
+    var container = document.createElement("div");
+    container.classList.add("output");
 
-    var rangeEl = document.createElement("div");
-    var contentEl = document.createElement("div");
+    if (typeof(content) == 'string') {
+        container.innerHTML = content;
+    } else if (typeof(content) == 'object') {
+        container.innerHTML = '<pre class="smoothcorners">' + JSON.stringify(content, null, 2) + '</pre>';
+    } else {
+        container.innerHTML = 'Unknown type ' + typeof(content);
+    }
 
-    element.appendChild(rangeEl);
-    element.appendChild(contentEl);
-
-    return {
-        setRange: function(from, to) {
-            rangeEl.innerHTML = "Range: " + from + " - " + to;
-        },
-
-        setContent: function(content) {
-            if (typeof(content) == 'string') {
-                contentEl.innerHTML = content;
-            } else if (typeof(content) == 'object') {
-                contentEl.innerHTML = '<pre>' + JSON.stringify(content, null, 2) + '</pre>';
-            } else {
-                console.log(content);
-                content.innerHTML = 'Unknown type ' + typeof(content);
-            }
-        }
-    };
+    document.body.appendChild(container);
 }
 
-function grammar(element) {
+function colorTableWidget(gct) {
+    _gct = gct;
+    var container = document.createElement("div");
+    container.title = "Colour table";
+    container.classList.add("output");
+    container.classList.add("realsquare");
+    
+    var i=0, width = 1, height;
+
+    while (gct.length >> i > 0) {
+        i+=1;
+    }
+    width = (i - 1) * 2;
+    height = gct.length / width;
+    
+    var zoom = 10;
+    var canvas = document.createElement("canvas");
+    canvas.width = zoom * width;
+    canvas.height = zoom * height;
+    canvas.style.width = canvas.width + "px";
+    canvas.style.height = canvas.height + "px";
+    var context = canvas.getContext("2d");
+    container.appendChild(canvas);
+    document.body.appendChild(container);
+    
+
+    var color;
+    for (i=0; i<height; i++) {
+        for (j=0; j<width; j++) {
+            color = gct[i*width + j];
+            context.fillStyle = "#"
+                + color['r'].toString(16)
+                + color['g'].toString(16)
+                + color['b'].toString(16);
+            context.fillRect(j*zoom, i*zoom, zoom, zoom);
+        }
+    }
 }

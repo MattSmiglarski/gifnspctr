@@ -3,32 +3,36 @@
   <meta charset="utf-8"/>
   <link rel="stylesheet" href="style.css"/>
   <script src="widgets.js"></script>
+  <script src="navigator.js"></script>
   <script src="app.js"></script>
   <title>GIF format navigator</title>
 </head>
+
 <body>
-  <span id="gifurl">&nbsp;</span>
+  <div id="navbar">
+    &nbsp;
+    <span id="gifurl">&nbsp;</span>
 
-  <div id="links">
-    <span>Quick links:</span>
-    <a href="http://localhost?gif=/Y9ax5kJ.gif">Y9ax5kJ.gif</a>
-    <a href="http://localhost?gif=/GifSample.gif">GifSample.gif</a>
-  </div>
+    <div id="links">
+      <span>Quick links:</span>
+      <a href="http://localhost?gif=/Y9ax5kJ.gif">Y9ax5kJ.gif</a>
+      <a href="http://localhost?gif=/GifSample.gif">GifSample.gif</a>
+    </div>
 
-  <div id="bookmarklet" title="If you want a quick way to jump to this page when viewing a gif, copy the code in the input field and paste it as a bookmark location.">
-    <label>Bookmarklet</label>
-    <input value="javascript:document.location = 'http://localhost?gif=' + document.location;"
-           readonly="readonly"
-           onClick="this.select()"/>
+    <div id="bookmarklet" title="If you want a quick way to jump to this page when viewing a gif, copy the code in the input field and paste it as a bookmark location.">
+      <label>Bookmarklet</label>
+      <input value="javascript:document.location = 'http://localhost?gif=' + document.location;"
+             readonly="readonly"
+             onClick="this.select()"/>
+    </div>
   </div>
 
   <br style="clear:both;">
 
   <div class="grammar">
-    <h3>Grammar</h3>
     <div class="rule">
       <span class="word">GIF Data Stream</span> ::=
-      
+
       <span class="token header">Header</span>
       <span class="word">Logical Screen</span>
       <span class="word nary">Data</span>
@@ -82,4 +86,3 @@
   <div style="clear: both; height: 0;"></div>
 </body>
 </html>
-
