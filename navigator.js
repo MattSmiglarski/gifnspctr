@@ -1,7 +1,33 @@
 var textDecoder = new TextDecoder("utf-8");
 
+function ByteView(dataview) {
+    var byteCursor = 0;
+    var littleEndian = true;
+
+    function nextSlice(n) {
+        return dataview.buffer.slice(byteCursor, byteCursor += n);
+    }
+
+    function nextUint8() {
+        return dataview.getUint8(byteCursor++, littleEndian);
+    }
+
+    function nextUint16() {
+        var val = dataview.getUint16(byteCursor, littleEndian);
+        byteCursor += 2;
+        return val;
+    }
+
+    return {
+        nextUint8: nextUint8,
+        nextUint16: nextUint16,
+        nextSlice: nextSlice        
+    };
+}
+
+
 function stringFormatter(x) {
-    return textDecoder.decode(x);
+    return textDecoder.decode(new DataView(x));
 }
 
 function lsdFormatter(x) {
@@ -20,38 +46,39 @@ function colorTableParser(size, arraybuffer) {
     var dv = new DataView(arraybuffer);
     var i=0, r, g, b;
     
-    var gct = [];
+    var ct = [];
     for (i=0; i < 2<<size; i+=1) {
-        gct.push({
+        ct.push({
             r: dv.getUint8(3*i),
             g: dv.getUint8(3*i+1),
             b: dv.getUint8(3*i+2)
         });
     }
-    return gct;
+    return ct;
 }
-
+var gct;
 function navigateGif(data, visitor) {
-    var header, lsd, gct, imagedescriptor, gctdata, stringdata, subblocklengths, 
-        nextChar, sizeOfGct, size, cursor = 0, terminatorSeen = false;
+    var header, lsd, imagedescriptor, gctdata, stringdata, subblocklengths, 
+        nextChar, sizeOfGct, size, terminatorSeen = false;
 
-    header = stringFormatter(data.buffer.slice(cursor, cursor += 6));
+    var byteview = new ByteView(data);
+    header = stringFormatter(byteview.nextSlice(6));
     visitor.header(header);
 
-    lsd = lsdFormatter(data.buffer.slice(cursor, cursor += 7));
+    lsd = lsdFormatter(byteview.nextSlice(7));
     visitor.lsd(lsd);
 
     if (lsd.PackedFields >> 7) { // hasGlobalColorTable
         sizeOfGct = lsd.PackedFields & 7;
 
-        gctdata = data.buffer.slice(cursor, cursor += (3 * (2 << sizeOfGct)));
+        gctdata = byteview.nextSlice(3 * (2 << sizeOfGct));
         gct = colorTableParser(sizeOfGct, gctdata);
         visitor.gct(gct);
     }
 
     
     while (!terminatorSeen) {
-        nextByte = stringFormatter(data.buffer.slice(cursor, cursor += 1));
+        nextByte = stringFormatter(byteview.nextSlice(1));
 
         switch(nextByte) {
         case ';': // terminator
@@ -59,51 +86,51 @@ function navigateGif(data, visitor) {
             terminatorSeen = true;
             break;
         case '!': // extension
-            nextByte = data.getUint8(cursor++);
+            nextByte = byteview.nextUint8();
             _nb = nextByte;
 
             switch (nextByte) {
             case 0x1: // read_plain_text_extension
-                size = data.getUint8(cursor++);
+                size = byteview.nextUint8();
                 if (size != 12) {
                     throw "Expected size 12! " + size;
                 }
 
                 subblocklengths = [];
                 do {
-                    size = data.getUint8(cursor++);
-                    cursor += size;
+                    size = byteview.nextUint8();
+                    byteview.nextSlice(size); // throwaway for now.
                     subblocklengths.push(size);
                 } while (size > 0);
 
                 visitor.pte({
                     subblocks: subblocklengths.length,
                     totalsize: Array.reduce(subblocklengths, function(x, y) { return x + y; }),
-                    textGridLeftPosition: data.getUint16(cursor+=2),
-                    TextGridTopPosition: data.getUint16(cursor+=2),
-                    TextGridWidth: data.getUint16(cursor+=2),
-                    TextGridHeight: data.getUint16(cursor+=2),
-                    CharacterCellWidth: data.getUint8(cursor++),
-                    CharacterCellHeight: data.getUint8(cursor++),
-                    TextForegroundColorIndex: data.getUint8(cursor++),
-                    TextBackgroundColorIndex: data.getUint8(cursor++)
+                    textGridLeftPosition: byteview.nextUint16(),
+                    TextGridTopPosition: byteview.nextUint16(),
+                    TextGridWidth: byteview.nextUint16(),
+                    TextGridHeight: byteview.nextUint16(),
+                    CharacterCellWidth: byteview.nextUint8(),
+                    CharacterCellHeight: byteview.nextUint8(),
+                    TextForegroundColorIndex: byteview.nextUint8(),
+                    TextBackgroundColorIndex: byteview.nextUint8()
                 });
 
                 
                 break;
             case 0xf9: // read_graphic_control_extension
-                size = data.getUint8(cursor++);
+                size = byteview.nextUint8();
                 if (size != 4) {
                     throw "Expected size 4! " + size;
                 }
 
                 visitor.gce({
-                    packedFields: data.getUint8(cursor++),
-                    delayTime: data.getUint16(cursor+=2),
-                    transparentColorIndex: data.getUint8(cursor++)
+                    packedFields: byteview.nextUint8(),
+                    delayTime: byteview.nextUint16(),
+                    transparentColorIndex: byteview.nextUint8()
                 });
 
-                bt = data.getUint8(cursor++);
+                bt = byteview.nextUint8();
                 if (bt) {
                     throw "Expected block terminator! " + bt;
                 }                
@@ -111,41 +138,48 @@ function navigateGif(data, visitor) {
                 break;
             case 0xfe: // read_comment_extension
                 do {
-                    size = data.getUint8(cursor++);
-                    stringdata = stringFormatter(data.buffer.slice(cursor, cursor += size));
+                    size = byteview.nextUint8();
+                    stringdata = stringFormatter(byteview.nextSlice(size));
                     visitor.commentExtension(stringdata);
                 } while (size > 0);
                 break;
             case 0xff: // read_application_extension
-                size = data.getUint8(cursor++);
+                size = byteview.nextUint8();
                 if (size != 11) {
                     throw "Expected size 11! " + size;
                 }
-                stringdata = stringFormatter(data.buffer.slice(cursor, cursor += 11));
+                stringdata = stringFormatter(byteview.nextSlice(11));
                 subblocklengths = [];
+                payload = "";
                 do {
-                    size = data.getUint8(cursor++);
-                    cursor += size;
+                    size = byteview.nextUint8();
                     subblocklengths.push(size);
+
+                    if (size > 0) {
+                        payload += stringFormatter(byteview.nextSlice(size));
+                    }
+
                 } while (size > 0);
                 visitor.ape({
                     applicationextension: stringdata,
                     subblocks: subblocklengths.length,
-                    totalsize: Array.reduce(subblocklengths, function(x, y) { return x + y; })
+                    totalsize: Array.reduce(subblocklengths, function(x, y) { return x + y; }),
+                    payload: payload
                 });
 
                 break;
-            default:  
+            default: {
                 throw "Unexpected byte " + nextByte.toString(16);
+            }
             }
             break;
         case ',': // imagedescriptor
             imagedescriptor = {
-                imageLeftPosition: data.getUint16(cursor+=2),
-                imageTopPosition: data.getUint16(cursor+=2),
-                imageWidth: data.getUint16(cursor+=2),
-                imageHeight: data.getUint16(cursor+=2),
-                packedFields: data.getUint8(cursor++)                
+                imageLeftPosition: byteview.nextUint16(),
+                imageTopPosition: byteview.nextUint16(),
+                imageWidth: byteview.nextUint16(),
+                imageHeight: byteview.nextUint16(),
+                packedFields: byteview.nextUint8()
             };
             visitor.imagedescriptor(imagedescriptor);
 
@@ -153,27 +187,25 @@ function navigateGif(data, visitor) {
                 sizeoflocalcolortable = imagedescriptor.packedFields & 7;
                 var lct = colorTableParser(
                     sizeoflocalcolortable,
-                    data.buffer.slice(cursor, cursor += (3 * 2 << sizeoflocalcolortable))
+                    byteview.nextSlice(3 * 2 << sizeoflocalcolortable)
                 );
                 visitor.lct(lct);
             }
 
-            var lzwminimumcodesize = data.getUint8(cursor++);
+            var lzwminimumcodesize = byteview.nextUint8();
             subblocklengths = [];
-            do {
-                size = data.getUint8(cursor++);
-                cursor += size;
-                subblocklengths.push(size);
-            } while (size > 0);
-
-            visitor.imagedata({
-                lzwminimumcodesize: lzwminimumcodesize,
-                subblocks: subblocklengths.length,
-                totalsize: Array.reduce(subblocklengths, function(x, y) { return x + y; })
-            });
+            var addData = visitor.actualImage(
+                lct || gct,
+                lzwminimumcodesize,
+                imagedescriptor.imageWidth,
+                imagedescriptor.imageHeight);
+            size = byteview.nextUint8();
+            addData(byteview.nextSlice(size));
+            subblocklengths.push(size);
+            
             break;
         default:
-            throw ("Unexpected at " + cursor + " : " + nextByte);
+            throw ("Unexpected: '" + nextByte + "'");
         }
     }
 }

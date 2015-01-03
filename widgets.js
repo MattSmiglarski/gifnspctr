@@ -5,7 +5,10 @@ function addContainer(content) {
         container.classList.add("empty");
     }
 
-    if (typeof(content) == 'string') {
+    if (content instanceof HTMLElement) {
+        container.appendChild(content);
+        container.onclick = function(evt) { content.click(); };
+    } else if (typeof(content) == 'string') {
         container.innerHTML = content;
     } else if (typeof(content) == 'object') {
         container.innerHTML = '<pre class="smoothcorners">' + JSON.stringify(content, null, 2) + '</pre>';
@@ -49,11 +52,9 @@ function colorTableWidget(gct) {
     for (i=0; i<height; i++) {
         for (j=0; j<width; j++) {
             color = gct[i*width + j];
-            context.fillStyle = "#"
-                + color['r'].toString(16)
-                + color['g'].toString(16)
-                + color['b'].toString(16);
+            context.fillStyle = rgba2colour(color['r'], color['g'], color['b']);
             context.fillRect(j*zoom, i*zoom, zoom, zoom);
         }
     }
 }
+

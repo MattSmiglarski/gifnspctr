@@ -1,7 +1,9 @@
 var links = [
     "Y9ax5kJ.gif",
     "GifSample.gif",
-    "CBUZdvB.gif"
+    "CBUZdvB.gif",
+    "tiny.gif",
+    "sample_1.gif"
 ];
 
 function initLinks() {
