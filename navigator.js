@@ -196,9 +196,132 @@ function navigateGif(data, visitor) {
                 visitor.lct(lct);
             }
 
+            function actualImage(colortable, originalcodesize, width, height) {
+                var canvas = document.createElement("canvas");
+                var context = canvas.getContext("2d");
+                var zoom = 1;
+                var cursor = 0;
+
+                canvas.width = width * zoom;
+                canvas.height = height * zoom;
+                canvas.style.width = canvas.width + "px";
+                canvas.style.height = canvas.height + "px";
+
+                addContainer(canvas);
+
+                var table = null;
+                var codesize = originalcodesize + 1;
+                var previous = [];
+                var bv = BitView();
+
+                function decompress(data) {
+                    var next, entry;
+                    bv.add(new DataView(data));
+                    var indices = [];
+                    var resetCode = 1 << originalcodesize;
+                    var eoiCode = resetCode + 1;
+
+                    if (data.byteLength === 0) {
+                        return [];
+                    }
+
+                    function nextCode() {
+                        if (table.length === Math.pow(2, codesize)) {
+                            codesize += 1;
+                        }
+                        return bv.readNBits(codesize);
+                    }
+
+                    function reset() {
+                        var i;
+                        table = [];
+                        for (i=0; i<Math.pow(2, originalcodesize); i++) {
+                            table[i] = i;
+                        }
+                        codesize = originalcodesize + 1;
+                        table[i] = -1; // clear code
+                        table[i+1] = -2; // end of information code
+                    }
+
+                    function lookup(code) {
+                        var entry = table[code];
+                        if (typeof entry != 'undefined') {
+                            return [].concat(entry);
+                        } else {
+                            return null;
+                        }
+                    }
+
+                    function write(entry) {
+                        previous = entry;
+                        for (var i=0; i<entry.length; i++) {
+                            var x = (cursor + i) % width;
+                            var y = (cursor + i - x) / width;
+                            var color = colortable[entry[i]];
+                            if (typeof color === 'undefined') {
+                                console.log("Unknown color");
+                                continue;
+                            }
+
+                            var colorString = rgba2colour(color['r'], color['g'], color['b']);
+                            context.fillStyle = colorString;
+                            context.fillRect(x, y, zoom, zoom);
+                        }
+                        cursor += i;
+                    }
+
+                    // read the initial reset code if not initialised.
+                    if (!table) {
+                        if (bv.readNBits(codesize) != resetCode) {
+                            throw "Expected initial reset code!";
+                        } else {
+                            reset();
+                            // write the first code
+                            next = nextCode();
+                            entry = lookup(next);
+                            if (!entry) {
+                                throw "Failed to read first code!";
+                            }
+                            write(entry);
+                        }
+                    }
+
+                    while (bv.available() >= codesize) {
+                        next = nextCode();
+                        
+                        if (next === resetCode) {
+                            reset();
+                            console.log("received clear code");
+                        } else if (next === eoiCode) {
+                            console.log('Recieved EOI code.');
+                            break;
+                        }
+                        var k;
+                        entry = lookup(next);
+
+                        if (entry) {
+                            k = entry[0];
+                            table.push(previous.concat(k));
+                            write(entry);
+                        } else {
+                            k = previous[0];
+                            table.push([k].concat(previous));
+                            write([k].concat(previous));
+                        }
+                    }
+
+                    return indices;
+                }
+                
+                return function(compresseddata) {
+                    var imagedata = decompress(compresseddata);
+                    cursor += imagedata.length;
+                };
+            }
+
             var lzwminimumcodesize = byteview.nextUint8();
             subblocklengths = [];
-            var addData = visitor.actualImage(
+            var addData = actualImage(
                     lct || gct,
                     lzwminimumcodesize,
                     imagedescriptor.imageWidth,

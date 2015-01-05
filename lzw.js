@@ -1,7 +1,12 @@
-function BitView(dataView) {
+function BitView() {
 
     var bitcursor = 0;
     var bytecursor = 0;
+    var dataViews = [];
+
+    function add(anotherdataview) {
+        dataViews.push(anotherdataview);
+    }
 
     function readNBits(n) {
         var bitsleft, first, rest, b, bits, shift;
@@ -14,7 +19,7 @@ function BitView(dataView) {
             return (rest << bitsleft) | first;
         }
 
-        b = dataView.getUint8(bytecursor);
+        b = dataViews[0].getUint8(bytecursor);
 
         // eg. for n = 4, shift = 4: (b & 0b11110000) >> 4
         bits = ((b & (((1 << n) - 1)) << bitcursor) >> bitcursor);
@@ -22,6 +27,10 @@ function BitView(dataView) {
         bitcursor = (bitcursor + n) % 8;
         if (bitcursor == 0) {
             bytecursor +=1;
+        }
+        if (bytecursor == dataViews[0].byteLength) {
+            dataViews.shift();
+            bytecursor = 0;
         }
 
         return bits;
@@ -40,13 +49,19 @@ function BitView(dataView) {
     }
 
     function available() {
-        return (dataView.byteLength - bytecursor) * 8 - bitcursor;
+        var totalLength = 0;
+        for (var i=0; i<dataViews.length; i++) {
+            totalLength += dataViews[i].byteLength;
+        }
+        
+        return (totalLength - bytecursor) * 8 - bitcursor;
     }
     
     return {
         readBit: readBit,
         readNBits: readNBits,
-        available: available
+        available: available,
+        add: add
     };
 }
 
