@@ -56,6 +56,7 @@ function colorTableParser(size, arraybuffer) {
     }
     return ct;
 }
+
 var gct;
 function navigateGif(data, visitor) {
     var header, lsd, imagedescriptor, gctdata, stringdata, subblocklengths, 
@@ -79,6 +80,10 @@ function navigateGif(data, visitor) {
     
     while (!terminatorSeen) {
         nextByte = stringFormatter(byteview.nextSlice(1));
+
+        if (!nextByte) {
+            break;
+        }
 
         switch(nextByte) {
         case ';': // terminator
@@ -105,7 +110,7 @@ function navigateGif(data, visitor) {
 
                 visitor.pte({
                     subblocks: subblocklengths.length,
-                    totalsize: Array.reduce(subblocklengths, function(x, y) { return x + y; }),
+                    totalsize: subblocklengths.reduce(function(x, y) { return x + y; }),
                     textGridLeftPosition: byteview.nextUint16(),
                     TextGridTopPosition: byteview.nextUint16(),
                     TextGridWidth: byteview.nextUint16(),
@@ -163,14 +168,13 @@ function navigateGif(data, visitor) {
                 visitor.ape({
                     applicationextension: stringdata,
                     subblocks: subblocklengths.length,
-                    totalsize: Array.reduce(subblocklengths, function(x, y) { return x + y; }),
+                    totalsize: subblocklengths.reduce(function(x, y) { return x + y; }),
                     payload: payload
                 });
 
                 break;
-            default: {
+            default:  
                 throw "Unexpected byte " + nextByte.toString(16);
-            }
             }
             break;
         case ',': // imagedescriptor
@@ -195,17 +199,24 @@ function navigateGif(data, visitor) {
             var lzwminimumcodesize = byteview.nextUint8();
             subblocklengths = [];
             var addData = visitor.actualImage(
-                lct || gct,
-                lzwminimumcodesize,
-                imagedescriptor.imageWidth,
-                imagedescriptor.imageHeight);
-            size = byteview.nextUint8();
-            addData(byteview.nextSlice(size));
-            subblocklengths.push(size);
-            
+                    lct || gct,
+                    lzwminimumcodesize,
+                    imagedescriptor.imageWidth,
+                    imagedescriptor.imageHeight);
+            do {
+                size = byteview.nextUint8();
+                addData(byteview.nextSlice(size));
+                subblocklengths.push(size);
+            } while (size > 0);
+
+            visitor.imagedata({
+                lzwminimumcodesize: lzwminimumcodesize,
+                subblocks: subblocklengths.length,
+                totalsize: subblocklengths.reduce(function(x, y) { return x + y; })
+            });
+
             break;
-        default:
-            throw ("Unexpected: '" + nextByte + "'");
+        default: throw ("Unexpected: '" + nextByte + "'");
         }
     }
 }
