@@ -11,12 +11,20 @@ var links = [
 ];
 
 function initLinks() {
-    var el = document.getElementById("links");
+    var el = document.getElementById("links"),
+        gifregex = /gif=([^&]*)/,
+        currentLocation = document.location.toString();
 
     for (var i=0; i<links.length; i++) {
-        var c = document.location.toString().replace(
-                /gif=([^&]*)/,
-            function(match, $1) { return "gif=" + encodeURIComponent(links[i]); });
+        var c;
+        if (currentLocation.match(gifregex)) {
+            c = currentLocation.replace(
+                gifregex,
+                function(match, $1) { return "gif=" + encodeURIComponent(links[i]); }
+            );
+        } else {
+            c = currentLocation + "?gif=" + encodeURIComponent(links[i]);
+        }
         
         var linkEl = document.createElement("a");
         linkEl.href = c;

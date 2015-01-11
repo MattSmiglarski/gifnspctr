@@ -12,6 +12,7 @@
 * DONE Add more external links, trailer widget and titles on widgets.
 * DONE Fix colour table widget size bug.
 * DONE Display application extension data.
-* DONE LZW decompression
-* DONE Handle animated gifs
-* Handle interlaced gifs
+* DONE LZW decompression.
+* DONE Handle animated gifs.
+* Fix query parameter bug.
+* Handle interlaced gifs.
