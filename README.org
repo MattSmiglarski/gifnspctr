@@ -13,4 +13,5 @@
 * DONE Fix colour table widget size bug.
 * DONE Display application extension data.
 * DONE LZW decompression
-* TODO Handle animated gifs
+* DONE Handle animated gifs
+* Handle interlaced gifs

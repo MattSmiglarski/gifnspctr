@@ -58,6 +58,7 @@ function colorTableParser(size, arraybuffer) {
 }
 
 var gct;
+
 function navigateGif(data, visitor) {
     var header, lsd, imagedescriptor, gctdata, stringdata, subblocklengths, 
         nextChar, sizeOfGct, size, terminatorSeen = false;
@@ -211,13 +212,12 @@ function navigateGif(data, visitor) {
 
                 var table = null;
                 var codesize = originalcodesize + 1;
-                var previous = [];
+                var previous;
                 var bv = BitView();
 
                 function decompress(data) {
                     var next, entry;
                     bv.add(new DataView(data));
-                    var indices = [];
                     var resetCode = 1 << originalcodesize;
                     var eoiCode = resetCode + 1;
 
@@ -226,9 +226,15 @@ function navigateGif(data, visitor) {
                     }
 
                     function nextCode() {
-                        if (table.length === Math.pow(2, codesize)) {
+                        /*
+                         * When the table is full, the encoder can choose to use the table as is, making no
+                         * changes to it until the encoder chooses to clear it.  The encoder during
+                         * this time sends out codes that are of the maximum Code Size.
+                         */
+                        if (codesize < 12 && table.length === Math.pow(2, codesize)) {
                             codesize += 1;
                         }
+
                         return bv.readNBits(codesize);
                     }
 
@@ -241,6 +247,16 @@ function navigateGif(data, visitor) {
                         codesize = originalcodesize + 1;
                         table[i] = -1; // clear code
                         table[i+1] = -2; // end of information code
+
+                        previous = [];
+
+                        // write the first code
+                        next = nextCode();
+                        entry = lookup(next);
+                        if (!entry) {
+                            throw "Failed to read first code!";
+                        }
+                        write(entry);
                     }
 
                     function lookup(code) {
@@ -253,13 +269,18 @@ function navigateGif(data, visitor) {
                     }
 
                     function write(entry) {
+                        if (entry.length == 1 && entry[0] == -1) {
+                            reset();
+                            throw "Unexpected reset code!", cursor;
+                        }
+                        
                         previous = entry;
                         for (var i=0; i<entry.length; i++) {
                             var x = (cursor + i) % width;
                             var y = (cursor + i - x) / width;
                             var color = colortable[entry[i]];
                             if (typeof color === 'undefined') {
-                                console.log("Unknown color");
+                                throw ("Unknown color " + entry[i] + " at: " + cursor);
                                 continue;
                             }
 
@@ -276,13 +297,6 @@ function navigateGif(data, visitor) {
                             throw "Expected initial reset code!";
                         } else {
                             reset();
-                            // write the first code
-                            next = nextCode();
-                            entry = lookup(next);
-                            if (!entry) {
-                                throw "Failed to read first code!";
-                            }
-                            write(entry);
                         }
                     }
 
@@ -291,9 +305,8 @@ function navigateGif(data, visitor) {
                         
                         if (next === resetCode) {
                             reset();
-                            console.log("received clear code");
+                            next = nextCode();
                         } else if (next === eoiCode) {
-                            console.log('Recieved EOI code.');
                             break;
                         }
                         var k;
@@ -301,21 +314,24 @@ function navigateGif(data, visitor) {
 
                         if (entry) {
                             k = entry[0];
-                            table.push(previous.concat(k));
+                            if (table.length < 4096) { // when the decoder's table is full, it must not change the table until a clear code is received.
+                                table.push(previous.concat(k));
+                            }
                             write(entry);
                         } else {
                             k = previous[0];
-                            table.push([k].concat(previous));
+                            if (table.length < 4096) {
+                                table.push([k].concat(previous));
+                            } else {
+                                throw "I never expected that.";
+                            }
                             write([k].concat(previous));
                         }
                     }
-
-                    return indices;
                 }
                 
                 return function(compresseddata) {
                     var imagedata = decompress(compresseddata);
-                    cursor += imagedata.length;
                 };
             }
 
