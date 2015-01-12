@@ -7,7 +7,8 @@ var links = [
     "sample_2_animation.gif",
     "black.gif",
     "ronpaul.gif",
-    "fshQ1.gif"
+    "fshQ1.gif",
+    "interlaced.gif"
 ];
 
 function initLinks() {

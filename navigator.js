@@ -214,6 +214,7 @@ function navigateGif(data, visitor) {
                 var codesize = originalcodesize + 1;
                 var previous;
                 var bv = BitView();
+                var interlaced = (imagedescriptor.packedFields & 64) === 64;
 
                 function decompress(data) {
                     var next, entry;
@@ -268,16 +269,34 @@ function navigateGif(data, visitor) {
                         }
                     }
 
+                    // Interlacing
+                    var pass1 = 1 + Math.floor(height / 8);
+                    var pass2 = pass1 + 1 + Math.floor((height - 4) / 8);
+                    var pass3 = pass2 + 1 + Math.floor((height - 2) / 4);
+
                     function write(entry) {
                         if (entry.length == 1 && entry[0] == -1) {
                             reset();
                             throw "Unexpected reset code!", cursor;
                         }
-                        
+
                         previous = entry;
                         for (var i=0; i<entry.length; i++) {
                             var x = (cursor + i) % width;
                             var y = (cursor + i - x) / width;
+
+                            if (interlaced) {
+                                if (y < pass1) {
+                                    y *= 8;
+                                } else if (y < pass2) {
+                                    y = ((y - pass1) * 8) + 4;
+                                } else if (y < pass3) {
+                                    y = ((y - pass2) * 4) + 2;
+                                } else {
+                                    y = ((y - pass3) * 2) + 1;
+                                }
+                            }
+                            
                             var color = colortable[entry[i]];
                             if (typeof color === 'undefined') {
                                 throw ("Unknown color " + entry[i] + " at: " + cursor);

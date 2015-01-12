@@ -14,5 +14,6 @@
 * DONE Display application extension data.
 * DONE LZW decompression.
 * DONE Handle animated gifs.
-* Fix query parameter bug.
-* Handle interlaced gifs.
+* DONE Fix query parameter bug.
+* DONE Handle interlaced gifs.
+* TODO Display frames separately.
