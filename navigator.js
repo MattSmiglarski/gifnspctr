@@ -208,7 +208,7 @@ function navigateGif(data, visitor) {
                 canvas.style.width = canvas.width + "px";
                 canvas.style.height = canvas.height + "px";
 
-                addContainer(canvas);
+                addImage(canvas);
 
                 var table = null;
                 var codesize = originalcodesize + 1;

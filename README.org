@@ -16,4 +16,5 @@
 * DONE Handle animated gifs.
 * DONE Fix query parameter bug.
 * DONE Handle interlaced gifs.
-* TODO Display frames separately.
+* DONE Display frames separately.
+* Take links from local history.

@@ -4,7 +4,7 @@ body {
 }
 
 canvas {
-    border: solid black 1px;
+    margin: 1em;
 }
 
 .empty {

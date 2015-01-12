@@ -16,12 +16,15 @@ function addContainer(content) {
         container.innerHTML = 'Unknown type ' + typeof(content);
     }
 
-    document.body.appendChild(container);
+    document.getElementById("containers").appendChild(container);
     return container;
 }
 
+function addImage(canvas) {
+    document.getElementById("images").appendChild(canvas);
+}
+
 function colorTableWidget(gct) {
-    _gct = gct;
     var container = document.createElement("div");
     container.title = "Colour table";
     container.classList.add("output");
@@ -45,7 +48,7 @@ function colorTableWidget(gct) {
     canvas.style.height = canvas.height + "px";
     var context = canvas.getContext("2d");
     container.appendChild(canvas);
-    document.body.appendChild(container);
+    document.getElementById("containers").appendChild(container);
     
 
     var color;

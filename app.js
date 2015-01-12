@@ -39,7 +39,7 @@ function initApp() {
     var arrayBuffer, gifurl = determineGifUrl();
     document.getElementById("gifurl").innerHTML = gifurl;
     var req = new XMLHttpRequest();
-    req.open("GET", gifurl, true);
+    req.open("GET", gifurl + '?x' + Math.random(), true);
     req.responseType = "arraybuffer";
     req.onload = function(evt) {
         _req = req.response;
