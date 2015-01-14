@@ -1,5 +1,6 @@
 A simple GIF inspector.
 ==
+![gifnspctr](https://cloud.githubusercontent.com/assets/153540/5738418/d87cd5a6-9be3-11e4-841a-41f6f997a446.png)
 
 Given a url, display gif blocks and images.
 
