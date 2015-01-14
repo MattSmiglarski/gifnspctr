@@ -3,7 +3,7 @@ body {
     background: #F2FFEA;
 }
 
-canvas {
+#images canvas {
     margin: 1em;
 }
 

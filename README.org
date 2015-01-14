@@ -17,4 +17,6 @@
 * DONE Fix query parameter bug.
 * DONE Handle interlaced gifs.
 * DONE Display frames separately.
-* Take links from local history.
+* DONE Take links from local storage.
+* Check content type.
+* Improve performance.

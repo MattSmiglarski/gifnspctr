@@ -1,11 +1,3 @@
-function determineGifUrl() {
-    var gifurl = document.location.search.toString().replace(
-        /.*gif=([^\&]+).*/,
-        function(match, $1) { return $1; }
-    );
-    return decodeURIComponent(gifurl) || "http://localhost/GifSample.gif";
-}
-
 var widgetCreator = {
     header: function(header) {
         addContainer(header).title = "GIF Header";

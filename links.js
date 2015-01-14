@@ -1,34 +1,30 @@
-var links = [
-    "Y9ax5kJ.gif",
-    "GifSample.gif",
-    "CBUZdvB.gif",
-    "tiny.gif",
-    "sample_1.gif",
-    "sample_2_animation.gif",
-    "black.gif",
-    "ronpaul.gif",
-    "fshQ1.gif",
-    "interlaced.gif"
-];
+function determineGifUrl() {
+    var gifurl = document.location.search.toString().replace(
+        /.*gif=([^\&]+).*/,
+        function(match, $1) { return $1; }
+    );
+    return decodeURIComponent(gifurl) || "http://i.imgur.com/EDqGIpG.gif";
+}
 
 function initLinks() {
     var el = document.getElementById("links"),
-        gifregex = /gif=([^&]*)/,
-        currentLocation = document.location.toString();
+        gifurl = determineGifUrl(),
+        links = [];
+    
+    if (localStorage.getItem('history')) {
+        links = JSON.parse(localStorage.getItem('history'));
+    }
+
+    if (links.indexOf(gifurl) === -1) {
+        links.push(gifurl);
+        localStorage.setItem('history', JSON.stringify(links));
+    }
+    
+    var baseUrl = document.location.origin + document.location.pathname + '?' + document.location.search.replace(/[\?\&]*gif=[^\&]+/, '');
 
     for (var i=0; i<links.length; i++) {
-        var c;
-        if (currentLocation.match(gifregex)) {
-            c = currentLocation.replace(
-                gifregex,
-                function(match, $1) { return "gif=" + encodeURIComponent(links[i]); }
-            );
-        } else {
-            c = currentLocation + "?gif=" + encodeURIComponent(links[i]);
-        }
-        
         var linkEl = document.createElement("a");
-        linkEl.href = c;
+        linkEl.href = baseUrl + '&gif=' + encodeURIComponent(links[i]);
         linkEl.innerHTML = links[i];
         el.appendChild(linkEl);
     }
