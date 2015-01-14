@@ -24,6 +24,22 @@ var widgetCreator = {
     },
     terminator: function(terminator) {
         addContainer(terminator).title = "Terminator";
+    },
+    imageCanvas: function(imagedescriptor) {
+        var width = imagedescriptor.imageWidth,
+            height = imagedescriptor.imageHeight,
+            canvas = document.createElement("canvas"),
+            zoom = 1;
+        
+        canvas.className = 'imageframe';
+        canvas.width = width * zoom;
+        canvas.height = height * zoom;
+        canvas.style.width = canvas.width + "px";
+        canvas.style.height = canvas.height + "px";
+        return canvas;
+    },
+    spacer: function() {
+        addSpacer();
     }
 };
 

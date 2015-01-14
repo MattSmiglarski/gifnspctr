@@ -21,7 +21,7 @@ function addContainer(content) {
 }
 
 function addImage(canvas) {
-    document.getElementById("images").appendChild(canvas);
+    document.getElementById("containers").appendChild(canvas);
 }
 
 function colorTableWidget(gct) {
@@ -61,3 +61,8 @@ function colorTableWidget(gct) {
     }
 }
 
+function addSpacer() {
+    var spacer = document.createElement("div");
+    spacer.style = "clear:both; height: 0;";
+    document.getElementById("containers").appendChild(spacer);
+}

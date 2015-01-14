@@ -18,5 +18,4 @@
 * DONE Handle interlaced gifs.
 * DONE Display frames separately.
 * DONE Take links from local storage.
-* Check content type.
-* Improve performance.
+* DONE Show images on separate rows.

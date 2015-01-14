@@ -3,7 +3,7 @@ body {
     background: #F2FFEA;
 }
 
-#images canvas {
+canvas.imageframe {
     margin: 1em;
 }
 
