@@ -57,11 +57,11 @@ function colorTableParser(size, arraybuffer) {
     return ct;
 }
 
-var gct;
+var gct; // Global color table
 
 function navigateGif(data, visitor) {
     var header, lsd, imagedescriptor, gctdata, stringdata, subblocklengths, 
-        nextChar, sizeOfGct, size, terminatorSeen = false;
+        nextChar, sizeOfGct, size, terminatorSeen = false, graphiccontrolextension;
 
     var byteview = new ByteView(data);
     header = stringFormatter(byteview.nextSlice(6));
@@ -70,8 +70,6 @@ function navigateGif(data, visitor) {
     lsd = lsdFormatter(byteview.nextSlice(7));
     visitor.lsd(lsd);
 
-    visitor.spacer();
-
     if (lsd.PackedFields >> 7) { // hasGlobalColorTable
         sizeOfGct = lsd.PackedFields & 7;
 
@@ -79,6 +77,8 @@ function navigateGif(data, visitor) {
         gct = colorTableParser(sizeOfGct, gctdata);
         visitor.gct(gct);
     }
+
+    visitor.spacer();
     
     while (!terminatorSeen) {
         nextByte = stringFormatter(byteview.nextSlice(1));
@@ -86,8 +86,6 @@ function navigateGif(data, visitor) {
         if (!nextByte) {
             break;
         }
-
-        visitor.spacer();
 
         switch(nextByte) {
         case ';': // terminator
@@ -133,11 +131,13 @@ function navigateGif(data, visitor) {
                     throw "Expected size 4! " + size;
                 }
 
-                visitor.gce({
+                graphiccontrolextension = {
                     packedFields: byteview.nextUint8(),
                     delayTime: byteview.nextUint16(),
                     transparentColorIndex: byteview.nextUint8()
-                });
+                };
+
+                visitor.gce(graphiccontrolextension);
 
                 bt = byteview.nextUint8();
                 if (bt) {
@@ -203,6 +203,10 @@ function navigateGif(data, visitor) {
             var lzwminimumcodesize = byteview.nextUint8();
             var interlaced = (imagedescriptor.packedFields & 64) === 64;
             var canvas = visitor.imageCanvas(imagedescriptor);
+            var transparentcolorflag = graphiccontrolextension.packedFields & 1;
+            var transparentcolorindex = transparentcolorflag?
+                                         graphiccontrolextension.transparentColorIndex : null;
+            
             addImage(canvas);
 
             subblocklengths = [];
@@ -212,19 +216,17 @@ function navigateGif(data, visitor) {
                 lzwminimumcodesize,
                 imagedescriptor.imageWidth,
                 imagedescriptor.imageHeight,
-                interlaced);
+                interlaced,
+                transparentcolorindex);
             do {
                 size = byteview.nextUint8();
                 addData(byteview.nextSlice(size));
                 subblocklengths.push(size);
             } while (size > 0);
 
-            visitor.imagedata({
-                lzwminimumcodesize: lzwminimumcodesize,
-                subblocks: subblocklengths.length,
-                totalsize: subblocklengths.reduce(function(x, y) { return x + y; })
-            });
+            graphiccontrolextension = null; // Now out of scope.
 
+            visitor.spacer();
             break;
         default: throw ("Unexpected: '" + nextByte + "'");
         }

@@ -5,6 +5,7 @@ body {
 
 canvas.imageframe {
     margin: 1em;
+    float:right;
 }
 
 .empty {
@@ -44,7 +45,6 @@ canvas.imageframe {
 
 .grammar, .output {
     display: inline-block;
-    border: solid black 1px;
     border-radius: 0.5em;
     margin: 0 0 0.5em 1em;
     padding: 0.4em;
@@ -76,7 +76,9 @@ canvas.imageframe {
     background: #D9E7E4;
 }
 
-.rule {}
+.rule span {
+    display: inline-block;
+}
 
 .word, .token {
     color: #0f0f0f;

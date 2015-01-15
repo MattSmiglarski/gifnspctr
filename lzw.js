@@ -107,7 +107,7 @@ function context2rgba(context) {
 }
 
 
-function renderImage(canvas, colortable, originalcodesize, width, height, interlaced) {
+function renderImage(canvas, colortable, originalcodesize, width, height, interlaced, transparentcolorindex) {
     var zoom = 1;
     var cursor = 0;
 
@@ -202,11 +202,11 @@ function renderImage(canvas, colortable, originalcodesize, width, height, interl
                 if (typeof color === 'undefined') {
                     throw ("Unknown color " + entry[i] + " at: " + cursor);
                     continue;
+                } else if (transparentcolorindex != entry[i]) { // Don't fill the transparent colour
+                    var colorString = rgba2colour(color['r'], color['g'], color['b']);
+                    context.fillStyle = colorString;
+                    context.fillRect(x, y, zoom, zoom);
                 }
-
-                var colorString = rgba2colour(color['r'], color['g'], color['b']);
-                context.fillStyle = colorString;
-                context.fillRect(x, y, zoom, zoom);
             }
             cursor += i;
         }

@@ -63,6 +63,7 @@ function colorTableWidget(gct) {
 
 function addSpacer() {
     var spacer = document.createElement("div");
-    spacer.style = "clear:both; height: 0;";
+    spacer.style.clear = "both";
+    spacer.style.height = "0";
     document.getElementById("containers").appendChild(spacer);
 }
