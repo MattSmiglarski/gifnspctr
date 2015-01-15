@@ -209,7 +209,6 @@ function navigateGif(data, visitor) {
             
             addImage(canvas);
 
-            subblocklengths = [];
             var addData = renderImage(
                 canvas,
                 lct || gct,
@@ -218,13 +217,22 @@ function navigateGif(data, visitor) {
                 imagedescriptor.imageHeight,
                 interlaced,
                 transparentcolorindex);
+            var subblocks = [];
             do {
                 size = byteview.nextUint8();
-                addData(byteview.nextSlice(size));
-                subblocklengths.push(size);
+                subblocks.push(byteview.nextSlice(size));
             } while (size > 0);
 
-            graphiccontrolextension = null; // Now out of scope.
+            // Store work to execute later.
+            thunks.push(function(callback, subblocks) {
+                return function() {
+                    for (var i=0; i<subblocks.length; i++) {
+                        callback(subblocks[i]);
+                    }
+                };
+            }(addData, subblocks));
+
+            graphiccontrolextension = null; // The GCE is now out of scope.
 
             visitor.spacer();
             break;
@@ -232,3 +240,4 @@ function navigateGif(data, visitor) {
         }
     }
 }
+

@@ -1,3 +1,6 @@
+/**
+ * A container for reading variable bitlength data from a sequence of byte arrays. 
+ */
 function BitView() {
 
     var bitcursor = 0;
@@ -250,7 +253,5 @@ function renderImage(canvas, colortable, originalcodesize, width, height, interl
         }
     }
     
-    return function(compresseddata) {
-        var imagedata = decompress(compresseddata);
-    };
+    return decompress;
 }

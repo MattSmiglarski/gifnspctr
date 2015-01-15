@@ -47,6 +47,8 @@ function error() {
     document.getElementById('error').style.display = 'inline-block';
 }
 
+var thunks = []; // Container for delayed thunks (functions with no arguments).
+
 function initApp() {
     var arrayBuffer, gifurl = determineGifUrl();
     document.getElementById("gifurl").innerHTML = gifurl;
@@ -59,6 +61,13 @@ function initApp() {
         } else {
             error();
         }
+        
+        // We delayed the intensive processing until later.
+        window.setTimeout(function() {
+            for (var i=0; i<thunks.length; i++) {
+                thunks[i]();
+            }
+        }, 100);
     };
     req.send(null);
 }
