@@ -43,6 +43,10 @@ var widgetCreator = {
     }
 };
 
+function error() {
+    document.getElementById('error').style.display = 'inline-block';
+}
+
 function initApp() {
     var arrayBuffer, gifurl = determineGifUrl();
     document.getElementById("gifurl").innerHTML = gifurl;
@@ -50,8 +54,11 @@ function initApp() {
     req.open("GET", gifurl + '?x' + Math.random(), true);
     req.responseType = "arraybuffer";
     req.onload = function(evt) {
-        _req = req.response;
-        navigateGif(new DataView(req.response), widgetCreator);
+        if (req.status == 200) {
+            navigateGif(new DataView(req.response), widgetCreator);
+        } else {
+            error();
+        }
     };
     req.send(null);
 }

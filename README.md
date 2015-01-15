@@ -8,7 +8,7 @@ Usage
 ==
 * Clone the repository.
 * Visit the index.html page, either via the filesystem, or over HTTP.
-* (Optional) Copy the bookmarklet in the top right, and paste it into your browser's bookmark manager, and use it when viewing a GIF file.
+* (Optional) Copy the bookmarklet in the top right, and paste it into your browser's bookmark manager, using it when viewing a GIF file.
 
 This has been tested in the latest versions of Chrome and Firefox.
 
@@ -18,4 +18,3 @@ Why?
 ==
 
 Just because. It is interesting what could be done when dealing with binary formats on the client side.
-    

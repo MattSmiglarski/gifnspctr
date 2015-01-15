@@ -51,6 +51,13 @@ canvas.imageframe {
     float: left;
 }
 
+.error {
+    display: inline-block;
+    margin-left: 1em;
+    padding: 0 1em;
+    border: solid red;
+}
+
 .output {
     height: 156px;
     overflow:hidden;
