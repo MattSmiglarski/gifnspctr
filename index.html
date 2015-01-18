@@ -14,20 +14,21 @@
 <body>
   <div id="navbar">
     &nbsp;
-    <span id="gifurl">&nbsp;</span>
+    <a id="gifurl" target="_blank" title="View image in new tab.">View image</a>
 
     <div id="bookmarklet" title="If you want a quick way to jump to this page when viewing a gif, copy the code in the input field and paste it as a bookmark location.">
       <label>Bookmarklet</label>
       <input value="javascript:document.location = 'http://localhost?gif=' + document.location;"
              readonly="readonly"
-             onClick="this.select()"/>
+             onClick="this.select()"
+             size="50"/>
     </div>
 
     <div id="links">
       <span>Quick links:</span>
     </div>
 
-    <div class="spacer" style="clear: both;"></div>
+    <div style="clear: both;"></div>
   </div>
 
   <br style="clear:both;">
@@ -84,8 +85,9 @@
       <span class="token">Application Extension</span> |
       <span class="token">Comment Extension</span>
     </div>
+
   </div>
-  
+
   <div style="clear: both; height: 0;"></div>
 
   <div id="error" class="error" style="display: none">
@@ -93,5 +95,7 @@
   </div>
 
   <div id="containers"></div>
+
+  <div id="colour-hint">&nbsp;</div>
 </body>
 </html>

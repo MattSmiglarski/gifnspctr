@@ -1,4 +1,44 @@
-function addContainer(content) {
+function addHeader(content) {
+    var container = document.createElement("div"), header;
+    
+    container.classList.add("output");
+    if (content === 'GIF89a') {
+        header = document.createElement("a");
+        header.href = 'http://www.w3.org/Graphics/GIF/spec-gif89a.txt';
+        header.title = 'Click to visit the GIF89a specification.';
+        header.target = '_blank';
+    } else {
+        header = document.createElement("span");
+    }
+    
+    header.innerHTML = content;
+    container.appendChild(header);
+    document.getElementById("containers").appendChild(container);
+    return container;    
+}
+
+function addContainer(title, content) {
+    if (typeof(content) == 'object') {
+        var t = document.createElement("table");
+        var caption = document.createElement("caption");
+        caption.innerHTML = title;
+
+        t.appendChild(caption);
+        t.classList.add('output');
+        for (var k in content) {
+            var trow = document.createElement("tr");
+            var tkey = document.createElement("td");
+            var tvalue = document.createElement("td");
+            tkey.innerHTML = k;
+            tvalue.innerHTML = content[k];
+            trow.appendChild(tkey);
+            trow.appendChild(tvalue);
+            t.appendChild(trow);
+        }
+        document.getElementById("containers").appendChild(t);
+        return t;
+    }
+    
     var container = document.createElement("div");
     container.classList.add("output");
     if (content.length == "") {
@@ -10,8 +50,6 @@ function addContainer(content) {
         container.onclick = function(evt) { content.click(); };
     } else if (typeof(content) == 'string') {
         container.innerHTML = content;
-    } else if (typeof(content) == 'object') {
-        container.innerHTML = '<pre class="smoothcorners">' + JSON.stringify(content, null, 2) + '</pre>';
     } else {
         container.innerHTML = 'Unknown type ' + typeof(content);
     }
@@ -63,7 +101,6 @@ function colorTableWidget(gct) {
 
 function addSpacer() {
     var spacer = document.createElement("div");
-    spacer.style.clear = "both";
-    spacer.style.height = "0";
+    spacer.classList.add('spacer');
     document.getElementById("containers").appendChild(spacer);
 }

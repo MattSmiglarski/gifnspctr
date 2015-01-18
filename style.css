@@ -1,11 +1,32 @@
 body {
     margin: 0;
-    background: #F2FFEA;
+    background: #fcfcfc;
+}
+
+#colour-hint {
+    display: none;
+    top: 5em;
+    position: fixed;
+    font-size: 24px;
+    font-family: monospace;
+    padding: 0.3em;
+    color: #fff;
+    text-shadow: 1px 0 0 #000, 0 -1px 0 #000, 0 1px 0 #000, -1px 0 0 #000;
+}
+
+canvas {
+    border: solid white 1px;
+    cursor: pointer;
 }
 
 canvas.imageframe {
     margin: 1em;
     float:right;
+    background: white;
+}
+
+canvas:hover {
+    border: solid #a0a0a0 1px;
 }
 
 .empty {
@@ -14,33 +35,62 @@ canvas.imageframe {
 
 #navbar {
     border-bottom: solid #DBDBDB 2px;
-    padding: 0.3em;
-    line-height: 1.5em;
     background: #F8F5EB;
 }
 
 #gifurl {
-    display: none;
-    float:left;
-    margin: 0 1em 0 0;
+    float: left;
+    color: #a0a0a0;    
+    text-decoration: none;
+    color: black;
+    font-style: italic;
+    border-right: solid black 1px;
+    border-bottom: solid black 1px;
+    padding: 0.3em;
+    margin: 0;
+}
+
+#gifurl:hover {
+    background: white;
 }
 
 #links {
-    display: inline;
     float: left;
+    display: inline;
+    padding: 0.3em;
+}
+
+a {
+    color: black;
+    text-decoration: none;
+    font-style: italic;
+    font-size: 11pt;
+    margin: 1em;
+    padding: 0.1;
 }
 
 #links a {
-    text-decoration: none;
-    font-style: italic;
     color: #a0a0a0;
+    display: inline-block;
+    font-style: italic;
     font-size: 11pt;
-    margin: 0.4em;
+    margin: 0.1em 0.4em;
+    padding: 0 0.2em;
+}
+
+a:hover {
+    color: #606060;
+    background: white;
 }
 
 #bookmarklet {
     display: inline-block;
     float: right;
+}
+
+.grammar {
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 .grammar, .output {
@@ -58,12 +108,49 @@ canvas.imageframe {
     border: solid red;
 }
 
+.spacer {
+    clear: both;
+    border-bottom: solid #a0a0a0 2px;
+    display: block;
+    margin: 1em 5em;
+    height: 0;
+}
+
 .output {
-    height: 156px;
-    overflow:hidden;
-    position: relative;
     float: left;
-    background: #E8FFD9;
+}
+
+table {
+    border-collapse: collapse;
+    border-spacing: 1px;
+}
+
+table caption {
+    background-color: white;
+    border-top: solid #c0c0c0 1px;
+    padding: 0em 1em;
+    border-top-style: outset;
+    white-space: nowrap;
+}
+
+table tr:hover td {
+    background-color: white;
+    cursor: pointer;
+}
+
+table td {
+    background: #f0f0f0;
+    border: solid gray 1px;
+    padding: 0.4em 0.2em;
+    font-family: monospace;
+}
+
+table td:first-child {
+    font-weight: bold;
+}
+
+table td:last-child {
+    text-align: right;
 }
 
 .output pre {
@@ -72,11 +159,6 @@ canvas.imageframe {
 
 .smoothcorners {
     border-radius: 0.4em;
-}
-
-.output:hover {
-    overflow: visible;
-    z-index: 999;
 }
 
 .grammar {

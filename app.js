@@ -1,29 +1,29 @@
 var widgetCreator = {
     header: function(header) {
-        addContainer(header).title = "GIF Header";
+        addHeader(header);
     },
     lsd: function(lsd) {
-        addContainer(lsd).title = "Logical Screen Descriptor";
+        addContainer("Logical Screen Descriptor", lsd);
     },
     gct: colorTableWidget,
     lct: colorTableWidget,
     commentExtension: function(commentdata) {
-        addContainer(commentdata).title = "Comment data";
+        addContainer("Comment data", commentdata);
     },
     gce: function(jsondata) {
-        addContainer(jsondata).title = "Graphic Control Extension";
+        addContainer("Graphic Control Extension", jsondata);
     },
     imagedescriptor: function(data) {
-        addContainer(data).title = "Image descriptor";
+        addContainer("Image descriptor", data);
     },
     imagedata: function(data) {
-        addContainer(data).title = "Image data";
+        addContainer("Image data", data);
     },
     ape: function(ape) {
-        addContainer(ape).title = "Application Extension";
+        addContainer("Application Extension", ape);
     },
     terminator: function(terminator) {
-        addContainer(terminator).title = "Terminator";
+        addContainer("Terminator", terminator);
     },
     imageCanvas: function(imagedescriptor) {
         var width = imagedescriptor.imageWidth,
@@ -51,7 +51,7 @@ var thunks = []; // Container for delayed thunks (functions with no arguments).
 
 function initApp() {
     var arrayBuffer, gifurl = determineGifUrl();
-    document.getElementById("gifurl").innerHTML = gifurl;
+    document.getElementById("gifurl").href = gifurl;
     var req = new XMLHttpRequest();
     req.open("GET", gifurl + '?x' + Math.random(), true);
     req.responseType = "arraybuffer";
@@ -68,6 +68,24 @@ function initApp() {
                 thunks[i]();
             }
         }, 100);
+
+        var colourHint = document.getElementById("colour-hint");
+
+        var canvii = document.querySelectorAll('canvas');
+        for (var i=0; i<canvii.length; i++) {
+            
+            canvii.item(i).onclick = function(evt) {
+                var rgba = this.getContext('2d').getImageData(
+                    evt.pageX - this.offsetLeft,
+                    evt.pageY - this.offsetTop,
+                    1, 1).data;
+                var hex = rgba2colour(rgba[0], rgba[1], rgba[2]);
+                colourHint.style.display = 'block';
+                colourHint.innerHTML = hex;
+                colourHint.style.backgroundColor = hex;
+            };
+        }
+        
     };
     req.send(null);
 }
