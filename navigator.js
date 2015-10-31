@@ -203,7 +203,10 @@ function navigateGif(data, visitor) {
             var lzwminimumcodesize = byteview.nextUint8();
             var interlaced = (imagedescriptor.packedFields & 64) === 64;
             var canvas = visitor.imageCanvas(imagedescriptor);
-            var transparentcolorflag = graphiccontrolextension.packedFields & 1;
+            var transparentcolorflag;
+            if (typeof graphiccontrolextension !== 'undefined') {
+                transparentcolorflag = graphiccontrolextension.packedFields & 1;
+            }
             var transparentcolorindex = transparentcolorflag?
                                          graphiccontrolextension.transparentColorIndex : null;
             
