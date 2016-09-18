@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import GrammarGuide from './grammar';
-import initApp from '../../app.js';
+import initApp from './app.js';
 require('../../style.css');
 
 ReactDOM.render(
