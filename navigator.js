@@ -1,3 +1,6 @@
+import { addImage } from './widgets';
+import { renderImage } from './lzw';
+
 var textDecoder = new TextDecoder("utf-8");
 
 function ByteView(dataview) {
@@ -32,7 +35,6 @@ function stringFormatter(x) {
 
 function lsdFormatter(x) {
     var dv = new DataView(x);
-    _lsddv = dv;
     return {
         LogialScreenWidth: dv.getUint16(0, true),
         LogicalScreenHeight: dv.getUint16(2, true),
@@ -59,7 +61,7 @@ function colorTableParser(size, arraybuffer) {
 
 var gct; // Global color table
 
-function navigateGif(data, visitor) {
+export function navigateGif(data, visitor) {
     var header, lsd, imagedescriptor, gctdata, stringdata, subblocklengths, 
         nextChar, sizeOfGct, size, terminatorSeen = false, graphiccontrolextension;
 
@@ -81,7 +83,7 @@ function navigateGif(data, visitor) {
     visitor.spacer();
     
     while (!terminatorSeen) {
-        nextByte = stringFormatter(byteview.nextSlice(1));
+        let nextByte = stringFormatter(byteview.nextSlice(1));
 
         if (!nextByte) {
             break;
@@ -94,7 +96,7 @@ function navigateGif(data, visitor) {
             break;
         case '!': // extension
             nextByte = byteview.nextUint8();
-            _nb = nextByte;
+            let _nb = nextByte;
 
             switch (nextByte) {
             case 0x1: // read_plain_text_extension
@@ -139,7 +141,7 @@ function navigateGif(data, visitor) {
 
                 visitor.gce(graphiccontrolextension);
 
-                bt = byteview.nextUint8();
+                let bt = byteview.nextUint8();
                 if (bt) {
                     throw "Expected block terminator! " + bt;
                 }                
@@ -159,7 +161,7 @@ function navigateGif(data, visitor) {
                 }
                 stringdata = stringFormatter(byteview.nextSlice(11));
                 subblocklengths = [];
-                payload = "";
+                let payload = "";
                 do {
                     size = byteview.nextUint8();
                     subblocklengths.push(size);
@@ -227,7 +229,7 @@ function navigateGif(data, visitor) {
             } while (size > 0);
 
             // Store work to execute later.
-            thunks.push(function(callback, subblocks) {
+            window.thunks.push(function(callback, subblocks) {
                 return function() {
                     for (var i=0; i<subblocks.length; i++) {
                         callback(subblocks[i]);

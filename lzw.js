@@ -75,7 +75,7 @@ function f(n) {
         + ("00" + n.toString(16)).substr(-2);
 }
 
-function rgba2colour(r, g, b, a) {
+export function rgba2colour(r, g, b, a) {
     return '#'
         + ("00" + r.toString(16)).substr(-2)
         + ("00" + g.toString(16)).substr(-2)
@@ -110,7 +110,7 @@ function context2rgba(context) {
 }
 
 
-function renderImage(canvas, colortable, originalcodesize, width, height, interlaced, transparentcolorindex) {
+export function renderImage(canvas, colortable, originalcodesize, width, height, interlaced, transparentcolorindex) {
     var zoom = 1;
     var cursor = 0;
 

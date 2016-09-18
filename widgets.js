@@ -1,4 +1,6 @@
-function addHeader(content) {
+import { rgba2colour } from './lzw';
+
+export function addHeader(content) {
     var container = document.createElement("div"), header;
     
     container.classList.add("output");
@@ -17,7 +19,7 @@ function addHeader(content) {
     return container;    
 }
 
-function addContainer(title, content) {
+export function addContainer(title, content) {
     if (typeof(content) == 'object') {
         var t = document.createElement("table");
         var caption = document.createElement("caption");
@@ -58,11 +60,11 @@ function addContainer(title, content) {
     return container;
 }
 
-function addImage(canvas) {
+export function addImage(canvas) {
     document.getElementById("containers").appendChild(canvas);
 }
 
-function colorTableWidget(gct) {
+export function colorTableWidget(gct) {
     var container = document.createElement("div");
     container.title = "Colour table";
     container.classList.add("output");
@@ -99,7 +101,7 @@ function colorTableWidget(gct) {
     }
 }
 
-function addSpacer() {
+export function addSpacer() {
     var spacer = document.createElement("div");
     spacer.classList.add('spacer');
     document.getElementById("containers").appendChild(spacer);

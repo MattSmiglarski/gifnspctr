@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <div id="navbar">
+        <a id="gifurl" target="_blank" title="View image in new tab.">View image</a>
+
+        <div id="bookmarklet" title="If you want a quick way to jump to this page when viewing a gif, copy the code in the input field and paste it as a bookmark location.">
+            <label>Bookmarklet</label>
+            <input value="javascript:document.location = 'http://localhost?gif=' + document.location;"
+                   readonly="readonly"
+                   onClick="this.select()"
+                   size="50"/>
+        </div>
+
+        <div id="links">
+            <span>Quick links:</span>
+        </div>
+
+        <div style="clear: both;"></div>
+    </div>
+
+    <br style="clear:both;">
+
+    <div id="app"/>
+</body>
+</html>
