@@ -1,7 +1,4 @@
-import { addImage } from './widgets';
-import { renderImage } from './lzw';
-
-var textDecoder = new TextDecoder("utf-8");
+let textDecoder = new TextDecoder("utf-8");
 
 function ByteView(dataview) {
     var byteCursor = 0;

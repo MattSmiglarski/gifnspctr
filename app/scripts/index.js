@@ -1,9 +1,45 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import GrammarGuide from './grammar';
-import { Links, determineGifUrl } from './app.js';
 import { Next } from './gifdisplay';
 require('../styles/style.scss');
+
+export function determineGifUrl() {
+    var gifurl = document.location.search.toString().replace(
+        /.*gif=([^\&]+).*/,
+        function(match, $1) { return $1; }
+    );
+    return decodeURIComponent(gifurl) || "sample.gif";
+}
+
+export class Links extends React.Component {
+    constructor() {
+        super();
+        let linksStorage = localStorage.getItem('history');
+        let links = linksStorage? JSON.parse(linksStorage) : [];
+        const baseUrl = document.location.origin + document.location.pathname + '?' + document.location.search.replace(/[\?\&]*gif=[^\&]+/, '');
+
+        let gifurl = determineGifUrl();
+        if (links.indexOf(gifurl) === -1) {
+            links.push(gifurl);
+            localStorage.setItem('history', JSON.stringify(links));
+        }
+
+        this.state = {
+            baseUrl: baseUrl,
+            links: links
+        };
+    }
+
+    render() {
+        let linkElements = this.state.links.map((item, i) => {
+            return <a key={i} href={this.state.baseUrl + '&gif=' + encodeURIComponent(item)}>{item}</a>
+        });
+        return (<div id="links">
+            <span>Quick links:{linkElements}</span>
+        </div>);
+    }
+}
 
 let gifurl = determineGifUrl();
 ReactDOM.render(

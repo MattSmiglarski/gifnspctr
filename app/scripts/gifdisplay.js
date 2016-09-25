@@ -2,6 +2,10 @@ import React from 'react';
 import { navigateGif } from './navigator';
 import { rgba2colour, renderImage } from './lzw';
 
+function error() {
+    document.getElementById('error').style.display = 'inline-block';
+}
+
 export class Next extends React.Component {
     constructor() {
         super();
@@ -137,7 +141,7 @@ export class Next extends React.Component {
      * @param graphicControlExtension
      */
     gce(graphicControlExtension) {
-        this.possiblyIntroducesData();
+        this.introducesData();
         this.currentData.graphicBlock = {
             graphicControlExtension: graphicControlExtension
         };
@@ -233,6 +237,11 @@ export class Next extends React.Component {
 
     introducesData() {
         if (this.currentData) {
+            /*
+            This has been seen before.
+            The GIF found at http://i.imgur.com/EDqGIpG.gif has a GraphicControlExtension followed by
+            an ApplicationExtension.
+             */
             console.log("Incorrect GIF syntax!");
         }
         this.currentData = {};
