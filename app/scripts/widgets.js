@@ -68,8 +68,7 @@ export function colorTableWidget(gct) {
     var container = document.createElement("div");
     container.title = "Colour table";
     container.classList.add("output");
-    container.classList.add("realsquare");
-    
+
     var i,j, width = 1, height;
 
     var sqrt = Math.sqrt(gct.length);

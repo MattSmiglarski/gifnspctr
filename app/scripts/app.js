@@ -1,9 +1,7 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { colorTableWidget, addHeader, addContainer, addSpacer } from './widgets';
-import { navigateGif } from './navigator';
 
-function determineGifUrl() {
+export function determineGifUrl() {
     var gifurl = document.location.search.toString().replace(
         /.*gif=([^\&]+).*/,
         function(match, $1) { return $1; }
@@ -11,7 +9,7 @@ function determineGifUrl() {
     return decodeURIComponent(gifurl) || "sample.gif";
 }
 
-class Links extends React.Component {
+export class Links extends React.Component {
     constructor() {
         super();
         let linksStorage = localStorage.getItem('history');
@@ -34,9 +32,9 @@ class Links extends React.Component {
         let linkElements = this.state.links.map((item, i) => {
             return <a key={i} href={this.state.baseUrl + '&gif=' + encodeURIComponent(item)}>{item}</a>
         });
-        return (
-            <div>{linkElements}</div>
-        );
+        return (<div id="links">
+            <span>Quick links:{linkElements}</span>
+        </div>);
     }
 }
 
@@ -88,52 +86,3 @@ var widgetCreator = {
 function error() {
     document.getElementById('error').style.display = 'inline-block';
 }
-
-window.thunks = []; // Container for delayed thunks (functions with no arguments).
-
-function initApp() {
-    var arrayBuffer, gifurl = determineGifUrl();
-    ReactDOM.render(
-        <Links/>,
-        document.getElementById('links')
-    );
-    document.getElementById("gifurl").href = gifurl;
-    var req = new XMLHttpRequest();
-    req.open("GET", gifurl + '?x' + Math.random(), true);
-    req.responseType = "arraybuffer";
-    req.onload = function(evt) {
-        if (req.status == 200) {
-            navigateGif(new DataView(req.response), widgetCreator);
-        } else {
-            error();
-        }
-        
-        // We delayed the intensive processing until later.
-        window.setTimeout(function() {
-            for (var i=0; i<thunks.length; i++) {
-                thunks[i]();
-            }
-        }, 100);
-
-        var colourHint = document.getElementById("colour-hint");
-
-        var canvii = document.querySelectorAll('canvas');
-        for (var i=0; i<canvii.length; i++) {
-            
-            canvii.item(i).onclick = function(evt) {
-                var rgba = this.getContext('2d').getImageData(
-                    evt.pageX - this.offsetLeft,
-                    evt.pageY - this.offsetTop,
-                    1, 1).data;
-                var hex = rgba2colour(rgba[0], rgba[1], rgba[2]);
-                colourHint.style.display = 'block';
-                colourHint.innerHTML = hex;
-                colourHint.style.backgroundColor = hex;
-            };
-        }
-        
-    };
-    req.send(null);
-}
-
-module.exports = initApp;

@@ -112,7 +112,7 @@ export function navigateGif(data, visitor) {
                     subblocklengths.push(size);
                 } while (size > 0);
 
-                visitor.pte({
+                let pte = {
                     subblocks: subblocklengths.length,
                     totalsize: subblocklengths.reduce(function(x, y) { return x + y; }),
                     textGridLeftPosition: byteview.nextUint16(),
@@ -123,9 +123,8 @@ export function navigateGif(data, visitor) {
                     CharacterCellHeight: byteview.nextUint8(),
                     TextForegroundColorIndex: byteview.nextUint8(),
                     TextBackgroundColorIndex: byteview.nextUint8()
-                });
-
-                
+                };
+                visitor.pte(pte);
                 break;
             case 0xf9: // read_graphic_control_extension
                 size = byteview.nextUint8();
@@ -212,34 +211,17 @@ export function navigateGif(data, visitor) {
             var transparentcolorindex = transparentcolorflag?
                                          graphiccontrolextension.transparentColorIndex : null;
             
-            addImage(canvas);
-
-            var addData = renderImage(
-                canvas,
-                lct || gct,
-                lzwminimumcodesize,
-                imagedescriptor.imageWidth,
-                imagedescriptor.imageHeight,
-                interlaced,
-                transparentcolorindex);
             var subblocks = [];
             do {
                 size = byteview.nextUint8();
-                subblocks.push(byteview.nextSlice(size));
+                let subblock = byteview.nextSlice(size);
+                subblocks.push(subblock);
             } while (size > 0);
 
-            // Store work to execute later.
-            window.thunks.push(function(callback, subblocks) {
-                return function() {
-                    for (var i=0; i<subblocks.length; i++) {
-                        callback(subblocks[i]);
-                    }
-                };
-            }(addData, subblocks));
+            visitor.imagedata(subblocks, lzwminimumcodesize);
 
             graphiccontrolextension = null; // The GCE is now out of scope.
 
-            visitor.spacer();
             break;
         default: throw ("Unexpected: '" + nextByte + "'");
         }

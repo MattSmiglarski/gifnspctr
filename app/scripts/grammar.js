@@ -30,7 +30,7 @@ export default class GrammarGuide extends React.Component {
                 <div className="rule">
                     <span className="word">Graphic Block</span> ::=
 
-                    <span className="word optional">Graphic Control Extension</span>
+                    <span className="token optional">Graphic Control Extension</span>
                     <span className="word">Graphic-Rendering Block</span>
                 </div>
 
@@ -38,7 +38,7 @@ export default class GrammarGuide extends React.Component {
                     <span className="word">Graphic-Rendering Block</span> ::=
 
                     <span className="word">Table-Based Image</span> |
-                    <span className="word">Plain Text Extension</span>
+                    <span className="token">Plain Text Extension</span>
                 </div>
 
                 <div className="rule">
