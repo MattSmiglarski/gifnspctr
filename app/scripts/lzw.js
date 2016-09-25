@@ -68,14 +68,7 @@ function BitView() {
     };
 }
 
-/* Format binary and hex. */
-function f(n) {
-    return ("00000000" + n.toString(2)).substr(-8)
-        + "\t"
-        + ("00" + n.toString(16)).substr(-2);
-}
-
-function rgba2colour(r, g, b, a) {
+export function rgba2colour(r, g, b, a) {
     return '#'
         + ("00" + r.toString(16)).substr(-2)
         + ("00" + g.toString(16)).substr(-2)
@@ -83,34 +76,7 @@ function rgba2colour(r, g, b, a) {
         + (typeof a !== 'undefined'? ("00" + a.toString(16)).substr(-2) : '');
 }
 
-function bitLength(n) {
-    return n.toString(2).length;
-}
-
-function context2rgba(context) {
-    var width = context.canvas.width;
-    var height = context.canvas.height;
-    var imagedata = context.getImageData(0, 0, width, height);
-    var i, j, pixelStart;
-    var rgbaData = [];
-
-    for (i=0; i<imagedata.height; i++) {
-        for (j=0; j<imagedata.width; j++) {
-            pixelStart = 4*i*imagedata.width + 4*j;
-            rgbaData.push(rgba2colour(
-                imagedata.data[pixelStart],
-                imagedata.data[pixelStart + 1],
-                imagedata.data[pixelStart + 2],
-                imagedata.data[pixelStart + 3]
-            ));
-        }
-    }
-    
-    return rgbaData;
-}
-
-
-function renderImage(canvas, colortable, originalcodesize, width, height, interlaced, transparentcolorindex) {
+export function renderImage(canvas, colortable, originalcodesize, width, height, interlaced, transparentcolorindex) {
     var zoom = 1;
     var cursor = 0;
 
