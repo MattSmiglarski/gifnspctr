@@ -6,7 +6,7 @@ function error() {
     document.getElementById('error').style.display = 'inline-block';
 }
 
-export class Next extends React.Component {
+export class GifDisplay extends React.Component {
     constructor() {
         super();
         this.state = {
@@ -73,16 +73,11 @@ export class Next extends React.Component {
         });
     }
 
-    spacer() {
-        // no-op
-    }
-
     /**
-     * TODO: Camel-case.
      * Top-level item.
      * @param logicalScreenDescriptor
      */
-    lsd(logicalScreenDescriptor) {
+    logicalScreenDescriptor(logicalScreenDescriptor) {
         let logicalScreen = this.state.logicalScreen;
         logicalScreen.logicalScreenDescriptor = logicalScreenDescriptor;
         this.setState({
@@ -91,11 +86,10 @@ export class Next extends React.Component {
     }
 
     /**
-     * TODO: Camel-case.
      * Optional, top-level item.
      * @param globalColorTable
      */
-    gct(globalColorTable) {
+    globalColorTable(globalColorTable) {
         let logicalScreen = this.state.logicalScreen;
         logicalScreen.globalColorTable = globalColorTable;
         this.setState({
@@ -104,22 +98,20 @@ export class Next extends React.Component {
     }
 
     /**
-     * TODO: Rename to 'trailer'.
      * Here we append the previous GraphicBlock, ApplicationExtension or CommentExtension to the state.
      * (The corner case where no data blocks are present is not handled.)
      */
-    terminator(trailer) {
+    trailer(trailer) {
         this.setState({
             trailer: trailer
         });
     }
 
     /**
-     * TODO: Rename plainTextExtension
      * May have an existing graphicControlExtension; completes data item.
      * @param plainTextExtension
      */
-    pte(plainTextExtension) {
+    plainTextExtension(plainTextExtension) {
         this.possiblyIntroducesData();
         let graphicControlExtension;
         if (this.currentData.graphicBlock) {
@@ -135,12 +127,11 @@ export class Next extends React.Component {
     }
 
     /**
-     * TODO: Rename to 'graphicControlExtension'.
      * Associated with the graphic-rendering block following.
      * Introduces a new data item; optional; does not complete data item.
      * @param graphicControlExtension
      */
-    gce(graphicControlExtension) {
+    graphicControlExtension(graphicControlExtension) {
         this.introducesData();
         this.currentData.graphicBlock = {
             graphicControlExtension: graphicControlExtension
@@ -158,11 +149,10 @@ export class Next extends React.Component {
     }
 
     /**
-     * TODO: Rename application extension
      * May have an existing graphicControlExtension; completes data item.
      * @param applicationExtension
      */
-    ape(applicationExtension) {
+    applicationExtension(applicationExtension) {
         this.introducesData();
         this.currentData.specialPurposeBlock = {
             applicationExtension: applicationExtension
@@ -172,11 +162,10 @@ export class Next extends React.Component {
     // End of extensions
 
     /**
-     * TODO: Camel-case.
      * May have an associated graphicControlExtension; mandatory; does not complete data item.
-     * @param imagedescriptor
+     * @param imageDescriptor
      */
-    imagedescriptor(imagedescriptor) {
+    imageDescriptor(imageDescriptor) {
         this.possiblyIntroducesData();
 
         let graphicControlExtension;
@@ -189,7 +178,7 @@ export class Next extends React.Component {
                 graphicControlExtension: graphicControlExtension,
                 graphicRenderingBlock: {
                     tableBasedImage: {
-                        imageDescriptor: imagedescriptor
+                        imageDescriptor: imageDescriptor
                     }
                 }
             }
@@ -197,38 +186,22 @@ export class Next extends React.Component {
     }
 
     /**
-     * TODO: Rename localColorTable
      * Adds to existing data item; optional; does not complete data item.
      */
-    lct(localColorTable) {
+    localColorTable(localColorTable) {
         this.currentData.graphicBlock.graphicRenderingBlock.tableBasedImage.localColorTable = localColorTable;
     }
 
     /**
-     * TODO: Camel-case.
      * Adds to existing data item; mandatory; completes graphicBlock::data item.
      * Large object.
-     * The lzwminimumcodesize is a single byte introduced before the image data.
+     * The lzwMinimumCodeSize is a single byte introduced before the image data.
      */
-    imagedata(imageData, lzwminimumcodesize) {
+    imageData(imageData, lzwMinimumCodeSize) {
         let tableBasedImage = this.currentData.graphicBlock.graphicRenderingBlock.tableBasedImage;
         tableBasedImage.imageData = imageData;
-        tableBasedImage.lzwminimumcodesize = lzwminimumcodesize;
+        tableBasedImage.lzwMinimumCodeSize = lzwMinimumCodeSize;
         this.completesData();
-    }
-
-    imageCanvas(imagedescriptor) {
-        var width = imagedescriptor.imageWidth,
-            height = imagedescriptor.imageHeight,
-            canvas = document.createElement("canvas"),
-            zoom = 1;
-
-        canvas.className = 'imageframe';
-        canvas.width = width * zoom;
-        canvas.height = height * zoom;
-        canvas.style.width = canvas.width + "px";
-        canvas.style.height = canvas.height + "px";
-        return canvas;
     }
 
     possiblyIntroducesData() {
@@ -380,7 +353,7 @@ class TableBasedImage extends React.Component {
                 {localColorTable}
                 <ImageDescriptor data={this.props.data.imageDescriptor}/>
                 <GifImageData data={this.props.data.imageData}
-                              lzwminimumcodesize={this.props.data.lzwminimumcodesize}
+                              lzwMinimumCodeSize={this.props.data.lzwMinimumCodeSize}
                               imageDescriptor={this.props.data.imageDescriptor}
                               colorTable={colorTable}
                               graphicControlExtension={this.props.graphicControlExtension}
@@ -581,7 +554,7 @@ class GifImageData extends React.Component {
         let addData = renderImage(
             this.refs.canvas,
             this.props.colorTable,
-            this.props.lzwminimumcodesize,
+            this.props.lzwMinimumCodeSize,
             this.props.imageDescriptor.imageWidth,
             this.props.imageDescriptor.imageHeight,
             interlaced,

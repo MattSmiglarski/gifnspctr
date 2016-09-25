@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import GrammarGuide from './grammar';
-import { Next } from './gifdisplay';
+import { GifDisplay } from './gif-display';
 require('../styles/style.scss');
 
 export function determineGifUrl() {
@@ -70,7 +70,7 @@ ReactDOM.render(
         <div id="error" className="error" style={{display: "none"}}>
             <p>Could not download GIF. Please check the console log.</p>
         </div>
-        <Next/>
+        <GifDisplay/>
     </div>,
     document.getElementById('app')
 );

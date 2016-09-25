@@ -59,118 +59,117 @@ function colorTableParser(size, arraybuffer) {
 var gct; // Global color table
 
 export function navigateGif(data, visitor) {
-    var header, lsd, imagedescriptor, gctdata, stringdata, subblocklengths, 
-        nextChar, sizeOfGct, size, terminatorSeen = false, graphiccontrolextension;
+    var header, logicalScreenDescriptor, imageDescriptor, globalColorTableData,
+        stringData, subBlockLengths, nextChar, sizeOfGlobalColorTable, size,
+        terminatorSeen = false, graphicControlExtension;
 
-    var byteview = new ByteView(data);
-    header = stringFormatter(byteview.nextSlice(6));
+    var byteView = new ByteView(data);
+    header = stringFormatter(byteView.nextSlice(6));
     visitor.header(header);
 
-    lsd = lsdFormatter(byteview.nextSlice(7));
-    visitor.lsd(lsd);
+    logicalScreenDescriptor = lsdFormatter(byteView.nextSlice(7));
+    visitor.logicalScreenDescriptor(logicalScreenDescriptor);
 
-    if (lsd.PackedFields >> 7) { // hasGlobalColorTable
-        sizeOfGct = lsd.PackedFields & 7;
+    if (logicalScreenDescriptor.PackedFields >> 7) { // hasGlobalColorTable
+        sizeOfGlobalColorTable = logicalScreenDescriptor.PackedFields & 7;
 
-        gctdata = byteview.nextSlice(3 * (2 << sizeOfGct));
-        gct = colorTableParser(sizeOfGct, gctdata);
-        visitor.gct(gct);
+        globalColorTableData = byteView.nextSlice(3 * (2 << sizeOfGlobalColorTable));
+        gct = colorTableParser(sizeOfGlobalColorTable, globalColorTableData);
+        visitor.globalColorTable(gct);
     }
 
-    visitor.spacer();
-    
     while (!terminatorSeen) {
-        let nextByte = stringFormatter(byteview.nextSlice(1));
+        let nextByte = stringFormatter(byteView.nextSlice(1));
 
         if (!nextByte) {
             break;
         }
 
         switch(nextByte) {
-        case ';': // terminator
-            visitor.terminator(nextByte);
+        case ';': // trailer
+            visitor.trailer(nextByte);
             terminatorSeen = true;
             break;
         case '!': // extension
-            nextByte = byteview.nextUint8();
+            nextByte = byteView.nextUint8();
             let _nb = nextByte;
 
             switch (nextByte) {
             case 0x1: // read_plain_text_extension
-                size = byteview.nextUint8();
+                size = byteView.nextUint8();
                 if (size != 12) {
                     throw "Expected size 12! " + size;
                 }
 
-                subblocklengths = [];
+                subBlockLengths = [];
                 do {
-                    size = byteview.nextUint8();
-                    byteview.nextSlice(size); // throwaway for now.
-                    subblocklengths.push(size);
+                    size = byteView.nextUint8();
+                    byteView.nextSlice(size); // throwaway for now.
+                    subBlockLengths.push(size);
                 } while (size > 0);
 
                 let pte = {
-                    subblocks: subblocklengths.length,
-                    totalsize: subblocklengths.reduce(function(x, y) { return x + y; }),
-                    textGridLeftPosition: byteview.nextUint16(),
-                    TextGridTopPosition: byteview.nextUint16(),
-                    TextGridWidth: byteview.nextUint16(),
-                    TextGridHeight: byteview.nextUint16(),
-                    CharacterCellWidth: byteview.nextUint8(),
-                    CharacterCellHeight: byteview.nextUint8(),
-                    TextForegroundColorIndex: byteview.nextUint8(),
-                    TextBackgroundColorIndex: byteview.nextUint8()
+                    subBlocks: subBlockLengths.length,
+                    totalSize: subBlockLengths.reduce(function(x, y) { return x + y; }),
+                    textGridLeftPosition: byteView.nextUint16(),
+                    TextGridTopPosition: byteView.nextUint16(),
+                    TextGridWidth: byteView.nextUint16(),
+                    TextGridHeight: byteView.nextUint16(),
+                    CharacterCellWidth: byteView.nextUint8(),
+                    CharacterCellHeight: byteView.nextUint8(),
+                    TextForegroundColorIndex: byteView.nextUint8(),
+                    TextBackgroundColorIndex: byteView.nextUint8()
                 };
-                visitor.pte(pte);
+                visitor.plainTextExtension(pte);
                 break;
             case 0xf9: // read_graphic_control_extension
-                size = byteview.nextUint8();
+                size = byteView.nextUint8();
                 if (size != 4) {
                     throw "Expected size 4! " + size;
                 }
 
-                graphiccontrolextension = {
-                    packedFields: byteview.nextUint8(),
-                    delayTime: byteview.nextUint16(),
-                    transparentColorIndex: byteview.nextUint8()
+                graphicControlExtension = {
+                    packedFields: byteView.nextUint8(),
+                    delayTime: byteView.nextUint16(),
+                    transparentColorIndex: byteView.nextUint8()
                 };
 
-                visitor.gce(graphiccontrolextension);
+                visitor.graphicControlExtension(graphicControlExtension);
 
-                let bt = byteview.nextUint8();
+                let bt = byteView.nextUint8();
                 if (bt) {
-                    throw "Expected block terminator! " + bt;
+                    throw "Expected block trailer! " + bt;
                 }                
 
                 break;
             case 0xfe: // read_comment_extension
                 do {
-                    size = byteview.nextUint8();
-                    stringdata = stringFormatter(byteview.nextSlice(size));
-                    visitor.commentExtension(stringdata);
+                    size = byteView.nextUint8();
+                    stringData = stringFormatter(byteView.nextSlice(size));
+                    visitor.commentExtension(stringData);
                 } while (size > 0);
                 break;
             case 0xff: // read_application_extension
-                size = byteview.nextUint8();
+                size = byteView.nextUint8();
                 if (size != 11) {
                     throw "Expected size 11! " + size;
                 }
-                stringdata = stringFormatter(byteview.nextSlice(11));
-                subblocklengths = [];
+                stringData = stringFormatter(byteView.nextSlice(11));
+                subBlockLengths = [];
                 let payload = "";
                 do {
-                    size = byteview.nextUint8();
-                    subblocklengths.push(size);
+                    size = byteView.nextUint8();
+                    subBlockLengths.push(size);
 
                     if (size > 0) {
-                        payload += stringFormatter(byteview.nextSlice(size));
+                        payload += stringFormatter(byteView.nextSlice(size));
                     }
 
                 } while (size > 0);
-                visitor.ape({
-                    applicationextension: stringdata,
-                    subblocks: subblocklengths.length,
-                    totalsize: subblocklengths.reduce(function(x, y) { return x + y; }),
+                visitor.applicationExtension({
+                    applicationExtension: stringData,
+                    subBlocks: subBlockLengths.length,
+                    totalSize: subBlockLengths.reduce(function(x, y) { return x + y; }),
                     payload: payload
                 });
 
@@ -179,49 +178,47 @@ export function navigateGif(data, visitor) {
                 throw "Unexpected byte " + nextByte.toString(16);
             }
             break;
-        case ',': // imagedescriptor
-            imagedescriptor = {
-                imageLeftPosition: byteview.nextUint16(),
-                imageTopPosition: byteview.nextUint16(),
-                imageWidth: byteview.nextUint16(),
-                imageHeight: byteview.nextUint16(),
-                packedFields: byteview.nextUint8()
+        case ',': // imageDescriptor
+            imageDescriptor = {
+                imageLeftPosition: byteView.nextUint16(),
+                imageTopPosition: byteView.nextUint16(),
+                imageWidth: byteView.nextUint16(),
+                imageHeight: byteView.nextUint16(),
+                packedFields: byteView.nextUint8()
             };
-            visitor.imagedescriptor(imagedescriptor);
+            visitor.imageDescriptor(imageDescriptor);
 
-            if (imagedescriptor.packedFields >> 7) { // has local color table
-                sizeoflocalcolortable = imagedescriptor.packedFields & 7;
+            if (imageDescriptor.packedFields >> 7) { // has local color table
+                sizeOfLocalColorTable = imageDescriptor.packedFields & 7;
                 var lct = colorTableParser(
-                    sizeoflocalcolortable,
-                    byteview.nextSlice(3 * 2 << sizeoflocalcolortable)
+                    sizeOfLocalColorTable,
+                    byteView.nextSlice(3 * 2 << sizeOfLocalColorTable)
                 );
-                visitor.lct(lct);
+                visitor.localColorTable(lct);
             }
 
-            var lzwminimumcodesize = byteview.nextUint8();
-            var interlaced = (imagedescriptor.packedFields & 64) === 64;
-            var canvas = visitor.imageCanvas(imagedescriptor);
-            var transparentcolorflag;
-            if (typeof graphiccontrolextension !== 'undefined') {
-                transparentcolorflag = graphiccontrolextension.packedFields & 1;
+            var lzwMinimumCodeSize = byteView.nextUint8();
+            var interlaced = (imageDescriptor.packedFields & 64) === 64;
+            var transparentColorFlag;
+            if (typeof graphicControlExtension !== 'undefined') {
+                transparentColorFlag = graphicControlExtension.packedFields & 1;
             }
-            var transparentcolorindex = transparentcolorflag?
-                                         graphiccontrolextension.transparentColorIndex : null;
+            var transparentcolorindex = transparentColorFlag?
+                                         graphicControlExtension.transparentColorIndex : null;
             
-            var subblocks = [];
+            var subBlocks = [];
             do {
-                size = byteview.nextUint8();
-                let subblock = byteview.nextSlice(size);
-                subblocks.push(subblock);
+                size = byteView.nextUint8();
+                let subblock = byteView.nextSlice(size);
+                subBlocks.push(subblock);
             } while (size > 0);
 
-            visitor.imagedata(subblocks, lzwminimumcodesize);
+            visitor.imageData(subBlocks, lzwMinimumCodeSize);
 
-            graphiccontrolextension = null; // The GCE is now out of scope.
+            graphicControlExtension = null; // The GCE is now out of scope.
 
             break;
         default: throw ("Unexpected: '" + nextByte + "'");
         }
     }
 }
-
