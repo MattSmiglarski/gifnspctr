@@ -189,7 +189,7 @@ export function navigateGif(data, visitor) {
             visitor.imageDescriptor(imageDescriptor);
 
             if (imageDescriptor.packedFields >> 7) { // has local color table
-                sizeOfLocalColorTable = imageDescriptor.packedFields & 7;
+                let sizeOfLocalColorTable = imageDescriptor.packedFields & 7;
                 var lct = colorTableParser(
                     sizeOfLocalColorTable,
                     byteView.nextSlice(3 * 2 << sizeOfLocalColorTable)

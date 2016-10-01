@@ -230,7 +230,7 @@ export class GifDisplay extends React.Component {
     }
 }
 
-export default class GifDataStream extends React.Component {
+class GifDataStream extends React.Component {
     render() {
         var data = this.props.data.data.map((x, index) => (
             <Data key={index}

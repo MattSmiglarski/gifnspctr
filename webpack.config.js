@@ -1,7 +1,9 @@
+var webpack = require('webpack');
+
 process.env.BABEL_ENV = process.env.npm_lifecycle_event;
 
 const PATHS = {
-    build: './build'
+    build: '/Users/matthew/dev/gifnspctr/build'
 };
 
 var Webpack = require('webpack');
@@ -15,12 +17,14 @@ var htmlWebpackPlugin = new HtmlWebpackPlugin({
 
 module.exports = {
     entry: './app/scripts/index.js',
-    devtool: 'source-map',
-    output: {
+    devtool: 'eval',
+    output: {path: __dirname + '/public', filename: 'build/bundle.js'},
+    /*output: {
         path: PATHS.build,
         filename: 'index_bundle.js'
-    },
+    },*/
     plugins: [
+        new webpack.HotModuleReplacementPlugin(),
         htmlWebpackPlugin
     ],
     resolve: {
@@ -29,7 +33,7 @@ module.exports = {
     module: {
         loaders: [{
             test: /\.jsx?$/,
-            loaders: ['babel'],
+            loaders: ['react-hot', 'babel'],
             exclude: /node_modules/
         }, {
             test: /\.css$/,
