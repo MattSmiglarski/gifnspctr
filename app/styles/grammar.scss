@@ -1,0 +1,59 @@
+/* Styling for the grammar documentation element */
+$color-grammar: #D9E7E4;
+$color-symbol: #C9EAB2;
+$color-word: #DBE091;
+$color-token: #B7D7FC;
+
+.grammar {
+  margin: 0;
+  display: inline-block;
+  min-width: 38em;
+  background: $color-grammar;
+  border-radius: 0.15em;
+  padding: 0.4em;
+
+  .rule {
+    padding: 0.2em;
+
+    .symbol {
+      width: 12em;
+      float: left;
+      color: black;
+      background-color: $color-symbol;
+    }
+
+    .operator {
+      float: left;
+      margin: 0 0.5em;
+    }
+
+    .expression {
+      display: flex;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+  }
+
+  .word, .token {
+    padding: 0 0.2em;
+  }
+
+  .word {
+    background-color: $color-word;
+  }
+
+  .token {
+    background-color: $color-token;
+  }
+
+  .nary::after {
+    content: "*";
+  }
+
+  .optional::before {
+    content: "[";
+  }
+  .optional::after {
+    content: "]";
+  }
+}

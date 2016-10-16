@@ -1,6 +1,16 @@
 import React from 'react';
 import { navigateGif } from './navigator';
-import { rgba2colour, renderImage } from './lzw';
+import { rgba2colour } from './lzw';
+import {
+    ApplicationExtension,
+    LogicalScreenDescriptor,
+    GifImageData,
+    GlobalColorTable,
+    GraphicControlExtension,
+    Header,
+    ImageDescriptor,
+    Trailer
+} from './gif-widgets';
 
 function error() {
     document.getElementById('error').style.display = 'inline-block';
@@ -223,364 +233,126 @@ export class GifDisplay extends React.Component {
     render() {
         return (
             <div>
-                <GifDataStream data={this.state} />
+                <GifBreakdown data={this.state}/>
                 <div className="color-hint" ref="colorHint"/>
             </div>
         );
     }
 }
 
-class GifDataStream extends React.Component {
+class GifBreakdown extends React.Component {
+    constructor() {
+        super();
+        this.state = {
+            index: 0
+        };
+    }
+
+    componentDidMount() {
+        window.addEventListener('keydown', this.onKeyDown.bind(this));
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener('keydown', this.onKeyDown.bind(this));
+    }
+
+    onKeyDown(event) {
+        if (event.keyCode === 37) {
+            event.stopPropagation();
+            event.preventDefault();
+            this.decrement();
+        } else if (event.keyCode === 39) {
+            event.stopPropagation();
+            event.preventDefault();
+            this.increment();
+        }
+    }
+
+    setIndex(newIndex) {
+        let graphicBlocks = this.props.data.data.filter(x => x.graphicBlock);
+        if (0 <= newIndex && newIndex <= graphicBlocks.length) {
+            this.setState({
+                index: newIndex
+            });
+        }
+    }
+
+    decrement() {
+        this.setIndex(this.state.index - 1);
+    }
+
+    increment() {
+        this.setIndex(this.state.index + 1);
+    }
+
     render() {
-        var data = this.props.data.data.map((x, index) => (
-            <Data key={index}
-                  data={x}
-                  globalColorTable={this.props.data.logicalScreen.globalColorTable}
+        let imageIndex = this.state.index;
+        let graphicBlocks = this.props.data.data.filter(x => x.graphicBlock);
+        if (graphicBlocks.length == 0) {
+            return (
+                <div>No data</div>
+            );
+        }
+        let frameData = graphicBlocks[imageIndex];
+        let colorTable = frameData.graphicBlock.graphicRenderingBlock.localColorTable ||
+            this.props.data.logicalScreen.globalColorTable;
+        let tableBasedImage = frameData.graphicBlock.graphicRenderingBlock.tableBasedImage;
+        let graphicControlExtension = frameData.graphicBlock.graphicControlExtension;
+
+        let imageElement = (
+            <GifImageData data={tableBasedImage.imageData}
+                          lzwMinimumCodeSize={tableBasedImage.lzwMinimumCodeSize}
+                          imageDescriptor={tableBasedImage.imageDescriptor}
+                          colorTable={colorTable}
+                          graphicControlExtension={graphicControlExtension}
             />
-        ));
-        let logicalScreen = (this.props.data.logicalScreen?
-            <LogicalScreen data={this.props.data.logicalScreen}/> : '');
+        );
+
+        let extensions = this.props.data.data
+            .filter(data => data.specialPurposeBlock)
+            .map(data => data.specialPurposeBlock);
+
+        let applicationExtensions = extensions.filter(specialPurposeBlock => specialPurposeBlock.applicationExtension)
+            .map((specialPurposeBlock, index) => {
+                return (
+                    <ApplicationExtension key={index} data={specialPurposeBlock.applicationExtension}/>
+                );
+            });
+
+        let commentExtensions = extensions.filter(specialPurposeBlock => specialPurposeBlock.commentExtension)
+            .map((specialPurposeBlock, index) => {
+                return (
+                    <CommentExtension key={index} data={specialPurposeBlock.commentExtension}/>
+                );
+            });
 
         return (
-            <div>
+            <div className="gif-breakdown">
                 <Header data={this.props.data.header}/>
-                {logicalScreen}
-                {data}
+                <br className="spacer"/>
+                <div className="metadata-group">
+                    <LogicalScreenDescriptor data={this.props.data.logicalScreen.logicalScreenDescriptor}/>
+                    {applicationExtensions}
+                    {commentExtensions}
+                </div>
+                <div className="metadata-group">
+                    <GlobalColorTable data={colorTable}/>
+                    <GraphicControlExtension data={graphicControlExtension}/>
+                    <ImageDescriptor data={tableBasedImage.imageDescriptor}/>
+                </div>
+                <br className="spacer"/>
+                <div className="image-group">
+                    <div onClick={this.decrement.bind(this)} className="left scroller">
+                        {"<"}
+                    </div>
+                    {imageElement}
+                    <div onClick={this.increment.bind(this)} className="right scroller">
+                        {">"}
+                    </div>
+                </div>
+                <br className="spacer"/>
                 <Trailer data={this.props.data.trailer}/>
             </div>
         );
-    }
-}
-
-class LogicalScreen extends React.Component {
-    render() {
-        let globalColorTable = (this.props.data.globalColorTable?
-            (<GlobalColorTable data={this.props.data.globalColorTable}/>) : '');
-
-        return (
-            <div>
-                <LogicalScreenDescriptor data={this.props.data.logicalScreenDescriptor}/>
-                {globalColorTable}
-            </div>
-        );
-    }
-}
-
-class Data extends React.Component {
-    render() {
-        let body;
-        if (!this.props.data) {
-            body = (<span>No data</span>);
-        } else if (this.props.data.graphicBlock) {
-            body = (<GraphicBlock
-                data={this.props.data.graphicBlock}
-                globalColorTable={this.props.globalColorTable}
-            />);
-        } else if (this.props.data.specialPurposeBlock) {
-            body = (<SpecialPurposeBlock data={this.props.data.specialPurposeBlock}/>);
-        } else {
-            body = (<UnknownFormat data={this.props.data}/>);
-        }
-
-        return (
-            <div>
-                {body}
-                <div className="spacer"/>
-                <br style={{clear: 'both'}}/>
-            </div>
-        );
-    }
-}
-
-class GraphicBlock extends React.Component {
-    render() {
-        if (!this.props.data.graphicRenderingBlock) {
-            return (<UnknownFormat data={this.props.data}/>);
-        }
-
-        let graphicControlExtension = (this.props.data.graphicControlExtension)?
-            (<GraphicControlExtension data={this.props.data.graphicControlExtension}/>) : '';
-
-        return (
-            <div>
-                {graphicControlExtension}
-                <GraphicRenderingBlock
-                    data={this.props.data.graphicRenderingBlock}
-                    globalColorTable={this.props.globalColorTable}
-                    graphicControlExtension={this.props.data.graphicControlExtension}
-                />
-            </div>
-        );
-    }
-}
-
-class GraphicControlExtension extends React.Component {
-    render() {
-        return (
-            <GeneralStructure caption="Graphic Control Extension" data={this.props.data}/>
-        );
-    }
-}
-
-class GraphicRenderingBlock extends React.Component {
-    render() {
-        if (this.props.data.tableBasedImage) {
-            return (<TableBasedImage
-                data={this.props.data.tableBasedImage}
-                globalColorTable={this.props.globalColorTable}
-                graphicControlExtension={this.props.graphicControlExtension}
-            />);
-        } else if (this.props.data.plainTextExtension) {
-            return (<PlainTextExtension data={this.props.data.plainTextExtension}/>)
-        } else {
-            return (<UnknownFormat data={this.props.data}/>);
-        }
-    }
-}
-
-class TableBasedImage extends React.Component {
-    render() {
-        if (!this.props.data.imageDescriptor || !this.props.data.imageData) {
-            return (<UnknownFormat data={this.props.data}/>);
-        }
-
-        let localColorTable = this.props.data.localColorTable?
-            (<LocalColorTable data={this.props.data.localColorTable}/>) : '';
-        let colorTable = this.props.data.localColorTable || this.props.globalColorTable;
-
-        return (
-            <div>
-                {localColorTable}
-                <ImageDescriptor data={this.props.data.imageDescriptor}/>
-                <GifImageData data={this.props.data.imageData}
-                              lzwMinimumCodeSize={this.props.data.lzwMinimumCodeSize}
-                              imageDescriptor={this.props.data.imageDescriptor}
-                              colorTable={colorTable}
-                              graphicControlExtension={this.props.graphicControlExtension}
-                />
-            </div>
-        );
-    }
-}
-
-class UnknownFormat extends React.Component {
-    componentDidMount() {
-        console.log("Unexpected!", this.props);
-    }
-
-    render() {
-        return (<span>Unknown format!</span>);
-    }
-}
-
-class SpecialPurposeBlock extends React.Component {
-    render() {
-        if (this.props.data.applicationExtension) {
-            return (<ApplicationExtension data={this.props.data.applicationExtension}/>);
-        } else if (this.props.data.commentExtension) {
-            return (<CommentExtension data={this.props.data.commentExtension}/>);
-        } else {
-            return (<UnknownFormat data={this.props.data}/>);
-        }
-    }
-}
-
-class Header extends React.Component {
-    render() {
-        if (this.props.data === 'GIF89a') {
-            return (
-                <a title="Visit the GIF89a specification."
-                   href='http://www.w3.org/Graphics/GIF/spec-gif89a.txt'
-                   target="_blank"
-                >
-                    {this.props.data}
-                </a>
-            );
-        } else {
-            return (<span>{this.props.data}</span>);
-        }
-    }
-}
-
-class Trailer extends React.Component {
-    render() {
-        return (<span>{this.props.data}</span>);
-    }
-}
-
-class GeneralStructure extends React.Component {
-    render() {
-        if (this.props.data == null) {
-            return (<span>{this.props.caption} - no data.</span>);
-        }
-
-        let rows = Object.keys(this.props.data).map((key, index) => {
-            return (
-                <tr key={index}>
-                    <td>{key}</td>
-                    <td>{this.props.data[key]}</td>
-                </tr>
-            );
-        });
-        return (
-            <table className="output">
-                <caption>{this.props.caption}</caption>
-                <tbody>
-                {rows}
-                </tbody>
-            </table>
-        );
-    }
-}
-
-class LogicalScreenDescriptor extends React.Component {
-    render() {
-        return (
-            <GeneralStructure caption="Logical Screen Descriptor" data={this.props.data} />
-        );
-    }
-}
-
-class ColorTable extends React.Component {
-    componentDidMount() {
-        window.requestAnimationFrame(
-            ()=>this.paint(this.refs.canvas.getContext('2d'))
-        );
-    }
-
-    componentDidUpdate() {
-        window.requestAnimationFrame(
-            ()=>this.paint(this.refs.canvas.getContext('2d'))
-        );
-    }
-
-    paint(context) {
-        let color;
-        let gct = this.props.data;
-        let zoom = this.props.zoom;
-        let height = this.props.height;
-        let width = this.props.width;
-
-        for (let i=0; i<height; i++) {
-            for (let j=0; j<width; j++) {
-                color = gct[i*width + j];
-                context.fillStyle = rgba2colour(color['r'], color['g'], color['b']);
-                context.fillRect(j*zoom, i*zoom, zoom, zoom);
-            }
-        }
-    }
-
-    render() {
-        let zoom = this.props.zoom;
-        let width = zoom * this.props.width;
-        let height = zoom * this.props.height;
-        return (
-            <div className="output" title="Color table">
-                <canvas ref="canvas"
-                        width={width}
-                        height={height}
-                        style={{
-                            width: width + 'px',
-                            height: height + 'px',
-                }}/>
-            </div>
-        );
-    }
-}
-
-class GlobalColorTable extends React.Component {
-    render() {
-        let gct = this.props.data;
-        let sqrt = Math.sqrt(gct.length);
-        let width = (Math.round(sqrt) == sqrt)?
-            sqrt : Math.sqrt(gct.length << 1);
-        let height = gct.length / width;
-
-        return (<ColorTable
-            zoom={10}
-            width={width}
-            height={height}
-            data={this.props.data}
-        />);
-    }
-}
-
-class ImageDescriptor extends React.Component {
-    render() {
-        return (<GeneralStructure caption="Image descriptor" data={this.props.data}/>);
-    }
-}
-
-class LocalColorTable extends React.Component {
-    render() {
-        return (<span>LocalColorTable</span>);
-    }
-}
-
-class ApplicationExtension extends React.Component {
-    render() {
-        return (<GeneralStructure caption="Application Extension" data={this.props.data}/>);
-    }
-}
-
-class CommentExtension extends React.Component {
-    render() {
-        return (<span>CommentExtension</span>);
-    }
-}
-
-class GifImageData extends React.Component {
-    componentDidMount() {
-        window.requestAnimationFrame(
-            ()=>this.paint(this.refs.canvas.getContext('2d'))
-        );
-    }
-
-    componentDidUpdate() {
-        window.requestAnimationFrame(
-            ()=>this.paint(this.refs.canvas.getContext('2d'))
-        );
-    }
-
-    paint() {
-        let interlaced = (this.props.imageDescriptor.packedFields & 64) === 64;
-        let transparentcolorflag;
-        if (this.props.graphicControlExtension) {
-            transparentcolorflag = this.props.graphicControlExtension.packedFields & 1;
-        }
-        let transparentcolorindex = transparentcolorflag?
-            this.props.graphicControlExtension.transparentColorIndex : null;
-
-        let addData = renderImage(
-            this.refs.canvas,
-            this.props.colorTable,
-            this.props.lzwMinimumCodeSize,
-            this.props.imageDescriptor.imageWidth,
-            this.props.imageDescriptor.imageHeight,
-            interlaced,
-            transparentcolorindex
-        );
-        window.setTimeout(() => {
-            for (let subblock of this.props.data) {
-                addData(subblock);
-            }
-        }, 100);
-    }
-
-    render() {
-        let width = this.props.imageDescriptor.imageWidth,
-            height = this.props.imageDescriptor.imageHeight;
-
-        return (<div>
-            <canvas ref="canvas"
-                    className="imageframe"
-                    width={width}
-                    height={height}
-                    style={{
-                        width: width + 'px',
-                        height: height + 'px'
-                    }}
-            />
-        </div>);
     }
 }

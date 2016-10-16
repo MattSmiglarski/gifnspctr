@@ -175,6 +175,8 @@ export function renderImage(canvas, colortable, originalcodesize, width, height,
                     var colorString = rgba2colour(color['r'], color['g'], color['b']);
                     context.fillStyle = colorString;
                     context.fillRect(x, y, zoom, zoom);
+                } else {
+                    context.clearRect(x, y, zoom, zoom);
                 }
             }
             cursor += i;

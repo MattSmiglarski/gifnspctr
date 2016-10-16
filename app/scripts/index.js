@@ -1,6 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import GrammarGuide from './grammar';
 import { GifDisplay } from './gif-display';
 require('../styles/style.scss');
 
@@ -44,7 +43,7 @@ export class Links extends React.Component {
 let gifurl = determineGifUrl();
 ReactDOM.render(
     <div>
-        <div id="navbar">
+        <div id="navbar" style={{display: 'none'}}>
             <a id="gifurl"
                href={gifurl}
                target="_blank"
@@ -65,8 +64,6 @@ ReactDOM.render(
             <div style={{clear: 'both', height: '0em'}}></div>
         </div>
         <div style={{clear: 'both', margin: '1em'}}></div>
-        <GrammarGuide/>
-        <div style={{clear: 'both'}}></div>
         <div id="error" className="error" style={{display: "none"}}>
             <p>Could not download GIF. Please check the console log.</p>
         </div>

@@ -1,3 +1,7 @@
+@import "reset";
+@import "breakdown";
+@import "grammar";
+
 body {
     margin: 0;
     background: #fcfcfc;
@@ -15,18 +19,12 @@ body {
 }
 
 canvas {
-    border: solid white 1px;
-    cursor: pointer;
 }
 
 canvas.imageframe {
-    margin: 1em;
-    float:right;
-    background: white;
 }
 
 canvas:hover {
-    border: solid #a0a0a0 1px;
 }
 
 .empty {
@@ -66,7 +64,6 @@ a {
     font-style: italic;
     font-size: 11pt;
     margin: 1em;
-    padding: 0.1;
 }
 
 #links a {
@@ -88,17 +85,8 @@ a:hover {
     float: right;
 }
 
-.grammar {
-    overflow: hidden;
-    white-space: nowrap;
-}
-
-.grammar, .output {
-    display: inline-block;
-    border-radius: 0.5em;
-    margin: 0 0 0.5em 1em;
-    padding: 0.4em;
-    float: left;
+.output {
+  float: left;
 }
 
 .error {
@@ -114,10 +102,6 @@ a:hover {
     display: block;
     margin: 1em 5em;
     height: 0;
-}
-
-.output {
-    float: left;
 }
 
 table {
@@ -157,47 +141,6 @@ table td:last-child {
     background: inherit;
 }
 
-.smoothcorners {
-    border-radius: 0.4em;
-}
-
-.grammar {
-    background: #D9E7E4;
-}
-
-.rule span {
-    display: inline-block;
-}
-
-.word, .token {
-    color: #0f0f0f;
-    padding: 0.1em 0.4em;
-    border-radius: 0.2em;
-    margin: 0.2em 0;
-}
-
-.word {
-    background-color: #DBE091;
-}
-
-.token {
-    background-color: #B7D7FC;
-}
-
-.nary::after {
-    content: "*";
-}
-
-.optional::before { content: "["; }
-.optional::after { content: "]"; }
-
-.rule :first-child {
-    display: inline-block;
-    width: 15em;
-    color: black;
-    background-color: #C9EAB2;
-}
-
 .clickable {
     text-decoration: underline;
     cursor: pointer;
@@ -213,4 +156,8 @@ table td:last-child {
 
 .nada {
     background: red;
+}
+
+.data {
+  float: right;
 }

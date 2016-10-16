@@ -1,13 +1,9 @@
 var webpack = require('webpack');
-
-process.env.BABEL_ENV = process.env.npm_lifecycle_event;
-
-const PATHS = {
-    build: '/Users/matthew/dev/gifnspctr/build'
-};
-
-var Webpack = require('webpack');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
+var CopyWebpackPlugin = require('copy-webpack-plugin');
+
+// make babel aware of HMR so it doesn't destroy app state on hot reload
+process.env.BABEL_ENV = process.env.npm_lifecycle_event;
 
 var htmlWebpackPlugin = new HtmlWebpackPlugin({
     title: 'GIF inspector demo',
@@ -15,17 +11,18 @@ var htmlWebpackPlugin = new HtmlWebpackPlugin({
     template: './app/index.html'
 });
 
+// Copy over sample images.
+var copyWebpackPlugin = new CopyWebpackPlugin([
+    { from: 'app/images' }
+]);
+
 module.exports = {
     entry: './app/scripts/index.js',
     devtool: 'eval',
     output: {path: __dirname + '/public', filename: 'build/bundle.js'},
-    /*output: {
-        path: PATHS.build,
-        filename: 'index_bundle.js'
-    },*/
     plugins: [
-        new webpack.HotModuleReplacementPlugin(),
-        htmlWebpackPlugin
+        htmlWebpackPlugin,
+        copyWebpackPlugin
     ],
     resolve: {
         extensions: ['', '.js', '.jsx']

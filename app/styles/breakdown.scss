@@ -1,0 +1,29 @@
+.gif-breakdown {
+  display: block;
+}
+
+.metadata-group {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-around;
+}
+
+.flex-margins, .image-group {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+}
+
+.scroller {
+
+  flex-grow: 1;
+
+  &:hover {
+    background-color: #D9E7E4;
+  }
+}
+
+.scroller.right {
+  text-align: right;
+}
+
