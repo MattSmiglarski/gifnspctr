@@ -294,8 +294,9 @@ class GifBreakdown extends React.Component {
             );
         }
         let frameData = graphicBlocks[imageIndex];
-        let colorTable = frameData.graphicBlock.graphicRenderingBlock.localColorTable ||
-            this.props.data.logicalScreen.globalColorTable;
+        let globalColorTable = this.props.data.logicalScreen.globalColorTable;
+        let localColorTable = frameData.graphicBlock.graphicRenderingBlock.tableBasedImage.localColorTable;
+        let colorTable = localColorTable || globalColorTable;
         let tableBasedImage = frameData.graphicBlock.graphicRenderingBlock.tableBasedImage;
         let graphicControlExtension = frameData.graphicBlock.graphicControlExtension;
 
@@ -341,6 +342,9 @@ class GifBreakdown extends React.Component {
                     <ImageDescriptor data={tableBasedImage.imageDescriptor}/>
                 </div>
                 <br className="spacer"/>
+                <div className="metadata-group">
+                <div>Image {this.state.index + 1} of {graphicBlocks.length}</div>
+                </div>
                 <div className="image-group">
                     <div onClick={this.decrement.bind(this)} className="left scroller">
                         {"<"}
