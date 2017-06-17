@@ -220,6 +220,6 @@ export function renderImage(canvas, colortable, originalcodesize, width, height,
             }
         }
     }
-    
+
     return decompress;
 }

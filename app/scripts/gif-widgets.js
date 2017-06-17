@@ -165,6 +165,9 @@ class ColorTable extends React.Component {
     }
 }
 
+/**
+ * FIXME: Merge with ColorTable, above. This is also used for LocalColorTable.
+ */
 export class GlobalColorTable extends React.Component {
     render() {
         if (!this.props.data) {
@@ -216,6 +219,10 @@ export class GifImageData extends React.Component {
         window.requestAnimationFrame(
             ()=>this.paint(this.refs.canvas.getContext('2d'))
         );
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        return nextProps.data !== this.props.data;
     }
 
     componentDidUpdate() {

@@ -1,3 +1,6 @@
+/**
+ * Module currently unused.
+ */
 import React from 'react';
 import {
     ApplicationExtension,

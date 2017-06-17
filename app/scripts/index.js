@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { GifDisplay } from './gif-display';
-require('../styles/style.scss');
 
 export function determineGifUrl() {
     var gifurl = document.location.search.toString().replace(
@@ -52,7 +51,7 @@ ReactDOM.render(
                 View image
             </a>
 
-            <div id="bookmarklet" title="If you want a quick way to jump to this page when viewing a gif, copy the code in the input field and paste it as a bookmark location.">
+            <div id="bookmarklet" title="For a quick way to jump to this page when viewing a gif, copy the code in the input field and paste it as a bookmark location.">
                 <label>Bookmarklet</label>
                 <input value="javascript:document.location = 'http://localhost?gif=' + document.location;"
                        readOnly="readonly"

@@ -1,9 +1,10 @@
-var webpack = require('webpack');
-var HtmlWebpackPlugin = require('html-webpack-plugin');
-var CopyWebpackPlugin = require('copy-webpack-plugin');
+const webpack = require('webpack');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 // make babel aware of HMR so it doesn't destroy app state on hot reload
-process.env.BABEL_ENV = process.env.npm_lifecycle_event;
+//process.env.BABEL_ENV = process.env.npm_lifecycle_event;
 
 var htmlWebpackPlugin = new HtmlWebpackPlugin({
     title: 'GIF inspector demo',
@@ -19,25 +20,31 @@ var copyWebpackPlugin = new CopyWebpackPlugin([
 module.exports = {
     entry: './app/scripts/index.js',
     devtool: 'eval',
-    output: {path: __dirname + '/public', filename: 'build/bundle.js'},
+    output: {
+        path: __dirname + '/public',
+        filename: 'build/bundle.js'},
     plugins: [
         htmlWebpackPlugin,
-        copyWebpackPlugin
+        copyWebpackPlugin,
+        new ExtractTextPlugin("style.css"),
+        new webpack.optimize.UglifyJsPlugin(),
     ],
     resolve: {
-        extensions: ['', '.js', '.jsx']
+        extensions: ['.js', '.jsx']
     },
     module: {
-        loaders: [{
-            test: /\.jsx?$/,
-            loaders: ['react-hot', 'babel'],
-            exclude: /node_modules/
-        }, {
-            test: /\.css$/,
-            loaders: ['style', 'css']
-        }, {
-            test: /\.scss$/,
-            loaders: ['style', 'css', 'sass']
-        }]
+        rules: [
+            {
+                test: /\.scss$/,
+                use: ExtractTextPlugin.extract({
+                    fallback: "style-loader",
+                    use: ["css-loader", "sass-loader"]
+                })
+            },
+            {
+                test: /\.jsx?$/,
+                loaders: ['babel-loader'], // Consider adding back react-hot-loader
+            }
+        ]
     }
 };
